@@ -7,25 +7,25 @@
 
 ##  Core Functionalities
 
-### 1.  "Sentinel" Home Audit (Gemini Vision)
+###  "Sentinel" Home Audit (Gemini Vision)
 Turn your phone into a risk detector. Point your camera at a room, and ResiliAi identifies:
 *   **Hazards:** "That heavy bookshelf isn't anchored (Earthquake Risk)."
 *   **Assets:** "Found: First Aid Kit, Canned Goods."
 *   **Result:** A prioritized, AI-generated fortification plan for your specific home.
 
-### 2.  "Guardian" Live Voice (Gemini Audio)
+###  "Guardian" Live Voice (Gemini Audio)
 Panic freezes the brain. ResiliAi unfreezes it.
 *   **Hands-Free:** Activate "Event Mode" with a single tap.
 *   **Calm Guidance:** A reasoning voice assistant (Gemini Live) talks you through smoke, floods, or blackouts in real-time.
 *   **Emotional Regulation:** The AI adapts its tone to de-escalate panic while keeping you moving.
 
-### 3.  "Drill Sergeant" Simulations
+###  "Drill Sergeant" Simulations
 Don't just read about disasters—live them (virtually).
 *   **Interactive Scenarios:** "It's 2 AM. Flood sirens are blaring. Battery is 12%. What do you do?"
 *   **Personalized:** Utilizing your *actual* home inventory scanned by Sentinel.
 *   **Gamified:** Earn Resilience Points for making the right active decisions.
 
-### 4.  "Lifeline" Community Mesh
+###  "Lifeline" Community Mesh
 When cell towers fail, your community shouldn't.
 *   **Offline-First:** Critical data is stored locally on your device.
 *   **Supply Matching:** "Neighbor Sarah has extra water." (Mesh Protocol Mockup).
@@ -59,3 +59,14 @@ Deep dive into our architecture and design:
 *    **[Product Concept](./Documentation/Product_Concept.md)** - The full vision, "Blue Sky / Grey Sky" lifecycle, and demo flow.
 *    **[Technical Architecture](./Documentation/Technical_Architecture.md)** - AI integration matrix, database schema, and security.
 *    **[User Flow & Wireframes](./Documentation/User_Flow.md)** - Step-by-step user journey from onboarding to crisis response.
+
+---
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
