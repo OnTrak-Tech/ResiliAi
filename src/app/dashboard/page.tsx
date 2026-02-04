@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Shield, Sun, CheckCircle, Home, Activity, User, Settings } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -57,9 +58,14 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
 
             <header className="flex justify-between items-center py-4 mb-6 relative z-10">
-                <h1 className="text-3xl font-black tracking-tighter uppercase italic font-antonio">
-                    RESILI<span className="text-orange-500">AI</span>
-                </h1>
+                <div className="relative h-8 w-32">
+                    <Image
+                        src="/icons/resiliai-logo.png"
+                        alt="ResiliAi"
+                        fill
+                        className="object-contain object-left"
+                    />
+                </div>
                 <div className="w-10 h-10 rounded-full border border-white/20 bg-gray-800 flex items-center justify-center overflow-hidden">
                     {/* Avatar Placeholder */}
                     <span className="font-bold text-gray-400">{profile.name ? profile.name[0] : 'U'}</span>

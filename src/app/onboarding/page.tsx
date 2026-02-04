@@ -37,8 +37,8 @@ export default function OnboardingPage() {
                         <div
                             key={step}
                             className={`h-1 flex-1 rounded-full transition-all duration-300 ${index <= ['profile', 'quiz', 'score'].indexOf(currentStep)
-                                ? 'bg-orange-500'
-                                : 'bg-gray-800'
+                                ? 'bg-orange-500 shadow-[0_0_8px_#f97316]'
+                                : 'bg-white/10'
                                 }`}
                         />
                     ))}
