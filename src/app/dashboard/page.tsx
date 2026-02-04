@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Shield, Sun, CheckCircle, Home, Activity, User, Settings } from 'lucide-react'
+import { Shield, Sun, CheckCircle, Home, Activity, User, Settings, Camera } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -152,6 +152,19 @@ export default function DashboardPage() {
                     <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mb-1">Daily Task</p>
                     <p className="text-center font-bold text-lg font-antonio tracking-wide text-white">Secure Balcony Items</p>
                     <p className="text-white/50 text-xs mt-2 text-center uppercase tracking-wider">High wind warning in effect</p>
+                </Card>
+
+                {/* Vision Audit - Scan Home Button */}
+                <Card
+                    onClick={() => router.push('/vision-audit')}
+                    className="col-span-2 bg-cyan-600/10 border-cyan-500/40 flex flex-col justify-center items-center p-6 backdrop-blur-sm hover:bg-cyan-600/20 transition-colors cursor-pointer group"
+                >
+                    <div className="mb-2 bg-cyan-500/20 p-3 rounded-full group-hover:bg-cyan-500/30 transition-colors">
+                        <Camera className="text-cyan-400 h-8 w-8" />
+                    </div>
+                    <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mb-1">Vision Audit</p>
+                    <p className="text-center font-bold text-lg font-antonio tracking-wide text-white">Scan Your Home</p>
+                    <p className="text-white/50 text-xs mt-2 text-center uppercase tracking-wider">AI-powered hazard detection</p>
                 </Card>
             </main>
 
