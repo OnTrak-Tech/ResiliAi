@@ -27,26 +27,54 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-black to-black opacity-80" />
       <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center">
+      {/* Top Left Branding */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="absolute top-6 left-6 flex items-center gap-2 z-20"
+      >
+        <Shield className="h-6 w-6 text-orange-500 fill-orange-500/10" />
+        <span className="font-oswald text-lg tracking-wide text-gray-200">ResiliAi</span>
+      </motion.div>
 
-        {/* Pulsating Shield Logo */}
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center mt-[-80px]"> {/* Visual weight adjustment */}
+
+        {/* Pulsating Shield / Heartbeat */}
         <div className="relative mb-12">
+          {/* Outer ripples */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0.5 }}
-            animate={{ scale: 1.2, opacity: 0 }}
+            animate={{ scale: 1.5, opacity: 0 }}
             transition={{
               duration: 2,
               repeat: Infinity,
               ease: "easeOut"
             }}
-            className="absolute inset-0 bg-red-600 rounded-full blur-xl"
+            className="absolute inset-0 bg-red-600/30 rounded-full blur-xl"
           />
           <motion.div
+            initial={{ scale: 0.8, opacity: 0.3 }}
+            animate={{ scale: 1.8, opacity: 0 }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeOut",
+              delay: 0.5
+            }}
+            className="absolute inset-0 bg-red-600/20 rounded-full blur-2xl"
+          />
+
+          {/* Center Circle */}
+          <motion.div
             animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="relative z-10 w-32 h-32 rounded-full bg-gradient-to-br from-gray-800 to-black border-2 border-red-500/50 flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.4)]"
           >
-            <Shield className="h-24 w-24 text-orange-500 fill-orange-500/10 stroke-[1.5]" />
+            {/* Heartbeat Line Graphic (CSS or SVG) */}
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
           </motion.div>
         </div>
 
@@ -57,19 +85,13 @@ export default function HomePage() {
           transition={{ delay: 0.3 }}
           className="text-center mb-16"
         >
-          <h2 className="text-orange-500 font-bold tracking-widest text-sm mb-2 uppercase">ResiliAi System</h2>
-          <h1 className="font-oswald text-6xl font-bold leading-none mb-1 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">
-            DISASTERS
+          <h1 className="font-oswald text-5xl md:text-6xl font-bold leading-tight mb-2 uppercase tracking-tight">
+            <span className="block text-white">Disasters</span>
+            <span className="block text-white">Don&apos;t Wait</span>
           </h1>
-          <h1 className="font-oswald text-6xl font-bold leading-none text-white">
-            DON&apos;T WAIT
-          </h1>
-          <p className="mt-6 text-gray-400 max-w-xs mx-auto text-sm leading-relaxed">
-            Your AI-powered survival intelligence. Audit your home. Train for emergencies. Stay prepared.
-          </p>
         </motion.div>
 
-        {/* Cyberpunk Button */}
+        {/* Glassmorphism Button - Matched to Mockup */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,13 +100,12 @@ export default function HomePage() {
         >
           <Button
             onClick={handleStart}
-            className="w-full h-16 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-oswald text-xl uppercase tracking-wider rounded-none relative group overflow-hidden border border-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.3)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] clip-path-slant"
-            style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+            // Glassmorphism style: Transparent bg + Blur + Border + Glow
+            className="w-full h-14 bg-white/5 backdrop-blur-md border border-white/20 hover:bg-white/10 hover:border-white/40 text-white font-oswald text-lg uppercase tracking-wider rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300 group"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              Start Scan <span className="text-xs opacity-70">///</span>
+            <span className="flex items-center justify-center gap-2">
+              Start Scan
             </span>
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
           </Button>
         </motion.div>
       </div>
@@ -94,12 +115,14 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="absolute bottom-8 flex gap-8 text-gray-600 text-xs font-medium tracking-wider uppercase"
+        className="absolute bottom-8 w-full flex justify-between px-8 text-gray-500 text-[10px] font-medium tracking-widest uppercase"
       >
-        <span>Home</span>
-        <span>Map</span>
-        <span>Alerts</span>
-        <span>Profile</span>
+        <div className="flex gap-6 mx-auto">
+          <span className="text-white border-b border-orange-500 pb-1">Home</span>
+          <span>Map</span>
+          <span>Alerts</span>
+          <span>Profile</span>
+        </div>
       </motion.div>
     </div>
   )
