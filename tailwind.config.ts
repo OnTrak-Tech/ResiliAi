@@ -11,6 +11,7 @@ const config: Config = {
             fontFamily: {
                 sans: ["var(--font-inter)"],
                 oswald: ["var(--font-oswald)"],
+                antonio: ["var(--font-antonio)"],
             },
             colors: {
                 background: "var(--background)",
