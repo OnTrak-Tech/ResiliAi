@@ -4,12 +4,7 @@ import { persist } from 'zustand/middleware'
 export interface UserProfile {
     id: string
     name: string
-    location: {
-        lat: number | null
-        lng: number | null
-        city: string
-        country: string
-    }
+    location: string
     emergencyContact: {
         name: string
         phone: string
@@ -26,7 +21,7 @@ export interface UserProfile {
 interface UserStore {
     profile: UserProfile
     setName: (name: string) => void
-    setLocation: (location: UserProfile['location']) => void
+    setLocation: (location: string) => void
     setEmergencyContact: (contact: UserProfile['emergencyContact']) => void
     setHousingType: (type: 'house' | 'apartment') => void
     setHasPets: (value: boolean) => void
@@ -41,7 +36,7 @@ interface UserStore {
 const initialProfile: UserProfile = {
     id: crypto.randomUUID(),
     name: '',
-    location: { lat: null, lng: null, city: '', country: '' },
+    location: '',
     emergencyContact: { name: '', phone: '' },
     housingType: null,
     hasPets: null,
@@ -97,7 +92,7 @@ export const useUserStore = create<UserStore>()(
                 // Preparedness bonuses
                 if (profile.hasBackupPower) score += 15
                 if (profile.emergencyContact.phone) score += 10
-                if (profile.location.lat && profile.location.lng) score += 5
+                if (profile.location.length > 0) score += 5
 
                 // Clamp between 0-100
                 score = Math.max(0, Math.min(100, score))

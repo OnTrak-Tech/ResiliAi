@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-inter",
+});
+
+const oswald = Oswald({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-oswald",
 });
 
 export const viewport: Viewport = {
@@ -43,7 +50,7 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${inter.className} antialiased bg-black text-white`}>
+      <body className={`${inter.variable} ${oswald.variable} font-sans antialiased bg-black text-white`}>
         {children}
       </body>
     </html>

@@ -37,8 +37,8 @@ export default function OnboardingPage() {
                         <div
                             key={step}
                             className={`h-1 flex-1 rounded-full transition-all duration-300 ${index <= ['profile', 'quiz', 'score'].indexOf(currentStep)
-                                    ? 'bg-orange-500'
-                                    : 'bg-gray-800'
+                                ? 'bg-orange-500'
+                                : 'bg-gray-800'
                                 }`}
                         />
                     ))}
@@ -54,7 +54,7 @@ export default function OnboardingPage() {
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className="w-full max-w-md"
+                            className="w-full h-full"
                         >
                             <ProfileStep onComplete={handleProfileComplete} />
                         </motion.div>
