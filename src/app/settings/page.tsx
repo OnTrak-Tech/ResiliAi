@@ -17,7 +17,6 @@ import {
     Settings as SettingsIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch' // Or custom toggle if needed
 import { motion } from 'framer-motion'
 
 export default function SettingsPage() {
@@ -65,8 +64,8 @@ export default function SettingsPage() {
                                 key={mode}
                                 onClick={() => setTheme(mode)}
                                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${theme === mode
-                                        ? 'bg-white text-gray-900 shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
                                 {mode}
@@ -116,7 +115,7 @@ export default function SettingsPage() {
                     </Button>
 
                     <span className="text-xs text-gray-400 font-medium">
-                        ResiliAI v2.4.0
+                        ResiliAI v1.0.0
                     </span>
                 </div>
 
