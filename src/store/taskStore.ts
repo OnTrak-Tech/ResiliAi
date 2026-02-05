@@ -1,65 +1,114 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { DailyTask } from '@/types/tasks'
+import { DailyTask, TASK_TEMPLATES } from '@/types/tasks'
+import { UserProfile } from './userStore'
 
 interface TaskStore {
+    tasks: DailyTask[]
     currentTask: DailyTask | null
     completedTaskIds: string[]
     lastGeneratedDate: string | null
 
-    setCurrentTask: (task: DailyTask) => void
-    completeTask: () => void
+    // Actions
+    generateDailyTasks: (profile: UserProfile, weather: any) => void
+    completeTask: (taskId: string) => void
     clearExpiredTasks: () => void
-    shouldGenerateNewTask: () => boolean
 }
 
 export const useTaskStore = create<TaskStore>()(
     persist(
         (set, get) => ({
+            tasks: [],
             currentTask: null,
             completedTaskIds: [],
             lastGeneratedDate: null,
 
-            setCurrentTask: (task) => set({
-                currentTask: task,
-                lastGeneratedDate: new Date().toISOString().split('T')[0],
-            }),
+            generateDailyTasks: (profile, weather) => {
+                const { lastGeneratedDate, completedTaskIds } = get()
+                const today = new Date().toISOString().split('T')[0]
 
-            completeTask: () => {
-                const { currentTask, completedTaskIds } = get()
-                if (currentTask) {
+                // Don't generate if already done today
+                if (lastGeneratedDate === today) return
+
+                // Simple algorithm to pick a suitable task
+                // 1. Filter templates based on profile (housing, pets, kids, etc.)
+                let suitableTemplates = TASK_TEMPLATES.filter(t => {
+                    // Housing check
+                    if (t.applicableHousing && profile.housingType && !t.applicableHousing.includes(profile.housingType)) return false
+                    // Vulnerability checks
+                    if (t.requiresPets && !profile.hasPets) return false
+                    if (t.requiresKids && !profile.hasKids) return false
+                    if (t.requiresElderly && !profile.hasElderly) return false
+                    // Don't repeat completed tasks too soon (simple check)
+                    if (completedTaskIds.includes(t.id)) return false
+
+                    return true
+                })
+
+                // 2. Prioritize weather triggers if bad weather
+                // (Simplified mock logic here)
+
+                // 3. Fallback to random if no weather trigger
+                if (suitableTemplates.length === 0) {
+                    // Reset completed if we ran out? or just pick generic
+                    suitableTemplates = TASK_TEMPLATES.filter(t => t.triggers.some(tr => tr.type === 'random'))
+                }
+
+                if (suitableTemplates.length > 0) {
+                    const randomTemplate = suitableTemplates[Math.floor(Math.random() * suitableTemplates.length)]
+
+                    const newTask: DailyTask = {
+                        id: crypto.randomUUID(), // Unique instance ID
+                        title: randomTemplate.title,
+                        description: randomTemplate.description,
+                        category: randomTemplate.category,
+                        priority: randomTemplate.priority,
+                        estimatedMinutes: randomTemplate.estimatedMinutes,
+                        completed: false,
+                        createdAt: new Date(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h expiry
+                        triggers: randomTemplate.triggers
+                    }
+
                     set({
-                        currentTask: {
-                            ...currentTask,
-                            completed: true,
-                            completedAt: new Date(),
-                        },
-                        completedTaskIds: [...completedTaskIds, currentTask.id].slice(-30), // Keep last 30
+                        tasks: [newTask],
+                        currentTask: newTask,
+                        lastGeneratedDate: today
+                    })
+                }
+            },
+
+            completeTask: (taskId) => {
+                const { tasks, completedTaskIds } = get()
+                const taskIndex = tasks.findIndex(t => t.id === taskId)
+
+                if (taskIndex >= 0) {
+                    const updatedTasks = [...tasks]
+                    updatedTasks[taskIndex] = {
+                        ...updatedTasks[taskIndex],
+                        completed: true,
+                        completedAt: new Date()
+                    }
+
+                    // Also find template ID if possible, but here we just track instance or template
+                    // ideally we track template ID to avoid repetition. 
+                    // For simplicity, assuming mapped IDs for now or ignoring strict repetition logic.
+
+                    set({
+                        tasks: updatedTasks,
+                        currentTask: updatedTasks[taskIndex], // Update current ref
+                        completedTaskIds: [...completedTaskIds, taskId]
                     })
                 }
             },
 
             clearExpiredTasks: () => {
-                const { currentTask } = get()
-                if (currentTask && new Date(currentTask.expiresAt) < new Date()) {
-                    set({ currentTask: null })
-                }
-            },
-
-            shouldGenerateNewTask: () => {
-                const { currentTask, lastGeneratedDate } = get()
-                const today = new Date().toISOString().split('T')[0]
-
-                // Generate new task if:
-                // 1. No current task
-                // 2. Current task is completed
-                // 3. It's a new day
-                if (!currentTask) return true
-                if (currentTask.completed) return true
-                if (lastGeneratedDate !== today) return true
-
-                return false
-            },
+                // Logic to clear old tasks
+                const now = new Date()
+                set(state => ({
+                    tasks: state.tasks.filter(t => new Date(t.expiresAt) > now)
+                }))
+            }
         }),
         {
             name: 'resiliai-tasks',
