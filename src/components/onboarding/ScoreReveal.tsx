@@ -33,58 +33,57 @@ export function ScoreReveal({ score, onContinue }: ScoreRevealProps) {
         return () => clearInterval(timer)
     }, [score])
 
-    const getScoreColor = () => {
-        if (score >= 70) return 'text-green-500'
-        if (score >= 40) return 'text-orange-500'
-        return 'text-red-500'
-    }
-
-    const getScoreMessage = () => {
-        if (score >= 70) return 'Great! You\'re well prepared.'
-        if (score >= 40) return 'Good start. Room for improvement.'
-        return 'Let\'s work on your preparedness.'
-    }
+    // Fixed blue color for the "Professional" theme, regardless of score
+    // The gauge logic remains (strokeDashoffset)
 
     const circumference = 2 * Math.PI * 90 // radius = 90
     const strokeDashoffset = circumference - (displayScore / 100) * circumference
 
     return (
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center font-sans px-6 pt-12">
+            {/* Progress Bar (Visual Only for this step as per mockup) */}
+            <div className="fixed top-0 left-0 right-0 z-50 p-4 bg-white">
+                <div className="max-w-md mx-auto flex gap-2">
+                    <div className="h-1 flex-1 rounded-full bg-blue-500" />
+                    <div className="h-1 flex-1 rounded-full bg-blue-500" />
+                    <div className="h-1 flex-1 rounded-full bg-blue-500" />
+                </div>
+            </div>
+
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', duration: 0.5 }}
-                className="mb-6"
+                className="mb-6 mt-8"
             >
-                <Shield className="h-12 w-12 text-orange-500" />
+                <Shield className="h-14 w-14 text-blue-600 fill-white" strokeWidth={1.5} />
             </motion.div>
 
-            <h2 className="text-2xl font-bold mb-2">Your Resilience Score</h2>
-            <p className="text-gray-400 mb-8">Based on your household profile</p>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900">Your Resilience Score</h2>
+            <p className="text-gray-500 mb-12 font-medium">Based on your household profile</p>
 
             {/* Circular progress */}
-            <div className="relative w-52 h-52 mb-8">
+            <div className="relative w-64 h-64 mb-12">
                 <svg className="w-full h-full transform -rotate-90">
                     {/* Background circle */}
                     <circle
-                        cx="104"
-                        cy="104"
+                        cx="128"
+                        cy="128"
                         r="90"
-                        stroke="currentColor"
-                        strokeWidth="12"
+                        stroke="#f3f4f6"
+                        strokeWidth="16"
                         fill="none"
-                        className="text-gray-800"
+                        className="opacity-50"
                     />
                     {/* Progress circle */}
                     <motion.circle
-                        cx="104"
-                        cy="104"
+                        cx="128"
+                        cy="128"
                         r="90"
-                        stroke="currentColor"
-                        strokeWidth="12"
+                        stroke="#2563eb"
+                        strokeWidth="16"
                         fill="none"
                         strokeLinecap="round"
-                        className={getScoreColor()}
                         initial={{ strokeDashoffset: circumference }}
                         animate={{ strokeDashoffset }}
                         style={{ strokeDasharray: circumference }}
@@ -93,10 +92,10 @@ export function ScoreReveal({ score, onContinue }: ScoreRevealProps) {
                 </svg>
                 {/* Score number */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={`text-5xl font-bold ${getScoreColor()}`}>
+                    <span className="text-7xl font-bold text-blue-600 tracking-tighter">
                         {displayScore}
                     </span>
-                    <span className="text-gray-500 text-sm">/100</span>
+                    <span className="text-gray-400 text-lg font-medium mt-1">/ 100</span>
                 </div>
             </div>
 
@@ -104,22 +103,23 @@ export function ScoreReveal({ score, onContinue }: ScoreRevealProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 2 }}
-                className="text-lg text-gray-300 mb-8"
+                className="text-lg text-gray-600 mb-12 max-w-xs font-medium"
             >
-                {getScoreMessage()}
+                Let&apos;s work on your preparedness.
             </motion.p>
 
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.5 }}
+                className="w-full max-w-md mt-auto mb-8"
             >
                 <Button
                     onClick={onContinue}
-                    className="bg-orange-500 hover:bg-orange-600 text-black font-semibold px-8"
+                    className="w-full h-14 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold text-lg rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300"
                 >
                     Go to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
             </motion.div>
         </div>
