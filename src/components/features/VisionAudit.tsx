@@ -1,24 +1,31 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Camera, X, Loader2, AlertTriangle, CheckCircle2, ArrowLeft } from 'lucide-react'
+import {
+    Camera,
+    X,
+    Loader2,
+    AlertTriangle,
+    CheckCircle2,
+    ArrowLeft,
+    Info,
+    Home,
+    Scan,
+    User,
+    Settings,
+    ChevronUp
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { analyzeImage, AnalysisResult, Hazard } from '@/services/geminiVision'
 
-// --- Severity Colors ---
+// --- Severity Colors (Clean Enterprise) ---
 const SEVERITY_COLORS: Record<Hazard['severity'], string> = {
-    LOW: 'text-blue-400 border-blue-400/50',
-    MEDIUM: 'text-yellow-400 border-yellow-400/50',
-    HIGH: 'text-orange-500 border-orange-500/50',
-    CRITICAL: 'text-red-500 border-red-500/50',
-}
-
-const SEVERITY_BG: Record<Hazard['severity'], string> = {
-    LOW: 'bg-blue-500/20',
-    MEDIUM: 'bg-yellow-500/20',
-    HIGH: 'bg-orange-500/20',
-    CRITICAL: 'bg-red-500/20',
+    LOW: 'text-blue-600 border-blue-200 bg-blue-50',
+    MEDIUM: 'text-yellow-600 border-yellow-200 bg-yellow-50',
+    HIGH: 'text-orange-600 border-orange-200 bg-orange-50',
+    CRITICAL: 'text-red-600 border-red-200 bg-red-50',
 }
 
 interface VisionAuditProps {
@@ -27,6 +34,7 @@ interface VisionAuditProps {
 }
 
 export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
+    const router = useRouter()
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [stream, setStream] = useState<MediaStream | null>(null)
@@ -49,7 +57,7 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
                 }
             } catch (err) {
                 console.error('Camera access error:', err)
-                setError('Camera access denied. Please grant permission to use this feature.')
+                setError('Camera access denied. Please grant permission.')
             }
         }
 
@@ -104,26 +112,22 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-black">
-            {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
-                <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/10">
+        <div className="fixed inset-0 z-50 bg-white flex flex-col font-sans">
+
+            {/* Header (Transparent over camera) */}
+            <div className="absolute top-0 left-0 right-0 z-20 pt-8 pb-4 px-4 flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent">
+                {/* No Logo as requested */}
+                <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
                     <ArrowLeft className="h-6 w-6" />
                 </Button>
-                <div className="flex items-center gap-2">
-                    <span className="text-white font-antonio text-xl tracking-wide uppercase">Vision Audit</span>
-                    {!result && !isAnalyzing && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500/20 border border-red-500/50 rounded text-red-400 text-xs font-bold uppercase animate-pulse">
-                            <span className="w-2 h-2 bg-red-500 rounded-full" />
-                            Live
-                        </span>
-                    )}
-                </div>
-                <div className="w-10" /> {/* Spacer */}
+                <span className="text-white font-semibold text-lg tracking-tight">AI Vision Audit Scan</span>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Info className="h-6 w-6" />
+                </Button>
             </div>
 
-            {/* Camera Feed / Captured Image */}
-            <div className="relative w-full h-full">
+            {/* Main Content (Camera) */}
+            <div className="flex-1 relative bg-black overflow-hidden">
                 {!capturedImage ? (
                     <>
                         <video
@@ -133,20 +137,25 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
                             muted
                             className="w-full h-full object-cover"
                         />
-                        {/* HUD Overlay */}
+                        {/* Clean Overlay */}
                         <div className="absolute inset-0 pointer-events-none">
-                            {/* Corner brackets */}
-                            <div className="absolute top-20 left-4 w-16 h-16 border-l-2 border-t-2 border-cyan-400/50" />
-                            <div className="absolute top-20 right-4 w-16 h-16 border-r-2 border-t-2 border-cyan-400/50" />
-                            <div className="absolute bottom-32 left-4 w-16 h-16 border-l-2 border-b-2 border-cyan-400/50" />
-                            <div className="absolute bottom-32 right-4 w-16 h-16 border-r-2 border-b-2 border-cyan-400/50" />
-                            {/* Center crosshair */}
+                            {/* White Rounded Corner Brackets */}
+                            <div className="absolute top-24 left-8 w-12 h-12 border-l-[3px] border-t-[3px] border-white rounded-tl-3xl opacity-80" />
+                            <div className="absolute top-24 right-8 w-12 h-12 border-r-[3px] border-t-[3px] border-white rounded-tr-3xl opacity-80" />
+                            <div className="absolute bottom-40 left-8 w-12 h-12 border-l-[3px] border-b-[3px] border-white rounded-bl-3xl opacity-80" />
+                            <div className="absolute bottom-40 right-8 w-12 h-12 border-r-[3px] border-b-[3px] border-white rounded-br-3xl opacity-80" />
+
+                            {/* Simple Crosshair */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <div className="w-8 h-0.5 bg-cyan-400/60" />
-                                <div className="w-0.5 h-8 bg-cyan-400/60 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                <div className="w-6 h-0.5 bg-white/80" />
+                                <div className="w-0.5 h-6 bg-white/80 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                             </div>
-                            {/* Scan lines */}
-                            <div className="absolute inset-x-0 top-1/3 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent animate-pulse" />
+
+                            {/* Label Mockups (Visual only until analyzed) */}
+                            {/* <div className="absolute top-1/3 right-12 bg-white px-3 py-1 rounded-lg shadow-lg flex flex-col items-center">
+                                <span className="text-[10px] font-bold text-gray-900">Blocked Exit - Hazard</span>
+                                <div className="w-0 h-0 border-l-[6px] border-l-transparent border-t-[8px] border-t-white border-r-[6px] border-r-transparent absolute -bottom-2" />
+                            </div> */}
                         </div>
                     </>
                 ) : (
@@ -157,128 +166,118 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
                     />
                 )}
 
-                {/* Hidden canvas for capture */}
                 <canvas ref={canvasRef} className="hidden" />
+
+                {/* Loading Overlay (Clean White) */}
+                {isAnalyzing && (
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-30">
+                        <Loader2 className="h-10 w-10 text-[#2563eb] animate-spin" />
+                        <div className="text-center">
+                            <h3 className="text-gray-900 font-bold text-xl">Analyzing Environment</h3>
+                            <p className="text-gray-500 text-sm mt-1">Gemini is identifying safety hazards...</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Error State */}
-            {error && (
-                <div className="absolute inset-x-4 top-24 bg-red-500/10 border border-red-500/50 rounded-lg p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
-                        <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0" />
-                        <p className="text-red-300 text-sm">{error}</p>
-                    </div>
-                </div>
+            {/* Bottom Controls Area (White) */}
+            {/* If no result, show capture button. If result, show sheet. */}
+
+            {/* Capture Button (Floating) */}
+            {!result && !isAnalyzing && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute bottom-28 left-0 right-0 flex justify-center z-20"
+                >
+                    <button
+                        onClick={captureImage}
+                        disabled={!stream}
+                        className="w-20 h-20 rounded-full bg-white border-4 border-gray-200 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all"
+                    >
+                        <Camera className="h-8 w-8 text-[#2563eb]" />
+                    </button>
+                </motion.div>
             )}
 
-            {/* Analysis Result */}
+            {/* Results Sheet (White Card Style) */}
             <AnimatePresence>
                 {result && (
                     <motion.div
-                        initial={{ opacity: 0, y: 100 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 100 }}
-                        className="absolute inset-x-0 bottom-0 bg-black/90 backdrop-blur-xl border-t border-white/10 rounded-t-3xl max-h-[60vh] overflow-y-auto"
+                        initial={{ y: '100%' }}
+                        animate={{ y: 0 }}
+                        exit={{ y: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        className="absolute bottom-[72px] left-0 right-0 z-30 max-h-[60vh] flex flex-col justify-end"
                     >
-                        <div className="p-6 space-y-4">
-                            {/* Risk Level Badge */}
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-white font-antonio text-2xl uppercase">Analysis Report</h3>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${SEVERITY_COLORS[result.overallRiskLevel]} ${SEVERITY_BG[result.overallRiskLevel]}`}>
-                                    {result.overallRiskLevel} Risk
-                                </span>
+                        <div className="bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] overflow-hidden">
+                            {/* Drag Handle */}
+                            <div className="w-full h-6 flex justify-center items-center bg-gray-50 border-b border-gray-100">
+                                <div className="w-10 h-1 rounded-full bg-gray-300" />
                             </div>
 
-                            {/* Summary */}
-                            <p className="text-gray-400 text-sm">{result.summary}</p>
+                            <div className="p-6 space-y-4 max-h-[50vh] overflow-y-auto">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-[#2563eb] font-bold text-lg">Gemini Vision Insights</h3>
+                                    <Button variant="outline" size="sm" className="text-xs h-7">Safety Tips</Button>
+                                    {/* <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${SEVERITY_COLORS[result.overallRiskLevel]}`}>
+                                        {result.overallRiskLevel} Risk
+                                    </span> */}
+                                </div>
 
-                            {/* Hazards */}
-                            {result.hazards.length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="text-orange-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                        <AlertTriangle className="h-4 w-4" /> Identified Hazards
-                                    </h4>
-                                    {result.hazards.map((hazard, i) => (
-                                        <div
-                                            key={i}
-                                            className={`p-3 rounded-lg border ${SEVERITY_COLORS[hazard.severity]} ${SEVERITY_BG[hazard.severity]}`}
-                                        >
-                                            <div className="flex items-start justify-between mb-1">
-                                                <span className="font-bold text-white">{hazard.item}</span>
-                                                <span className="text-xs uppercase">{hazard.severity}</span>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    {result.summary}
+                                </p>
+
+                                {/* List of Hazards */}
+                                {result.hazards.length > 0 && (
+                                    <div className="space-y-3 pt-2">
+                                        {result.hazards.map((hazard, i) => (
+                                            <div key={i} className="flex gap-3 items-start">
+                                                <AlertTriangle className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900">{hazard.item}</p>
+                                                    <p className="text-xs text-gray-500">{hazard.recommendation}</p>
+                                                </div>
                                             </div>
-                                            <p className="text-gray-300 text-sm">{hazard.recommendation}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Assets */}
-                            {result.assets.length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="text-green-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                        <CheckCircle2 className="h-4 w-4" /> Safety Assets Found
-                                    </h4>
-                                    <ul className="list-disc list-inside text-gray-300 text-sm space-y-1">
-                                        {result.assets.map((asset, i) => (
-                                            <li key={i}>{asset}</li>
                                         ))}
-                                    </ul>
-                                </div>
-                            )}
+                                    </div>
+                                )}
 
-                            {/* Actions */}
-                            <div className="flex gap-3 pt-4">
-                                <Button
-                                    onClick={handleRetry}
-                                    variant="outline"
-                                    className="flex-1 border-white/20 text-white hover:bg-white/10"
-                                >
-                                    Scan Again
-                                </Button>
-                                <Button
-                                    onClick={onClose}
-                                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                                >
-                                    Done
-                                </Button>
+                                <div className="pt-4 flex gap-3">
+                                    <Button onClick={handleRetry} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200">
+                                        Rescan
+                                    </Button>
+                                    <Button onClick={onClose} className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
+                                        Action Plan
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Capture Button */}
-            {!result && !isAnalyzing && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2"
-                >
-                    <button
-                        onClick={captureImage}
-                        disabled={!stream}
-                        className="relative w-20 h-20 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm flex items-center justify-center group disabled:opacity-50 transition-all hover:border-orange-500/60 hover:bg-orange-500/20"
-                    >
-                        <div className="w-14 h-14 rounded-full bg-white/80 group-hover:bg-orange-500 transition-colors flex items-center justify-center">
-                            <Camera className="h-6 w-6 text-black" />
-                        </div>
-                        {/* Glow ring */}
-                        <div className="absolute inset-0 rounded-full border-2 border-orange-500/40 animate-ping" />
-                    </button>
-                </motion.div>
-            )}
-
-            {/* Loading State */}
-            {isAnalyzing && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="h-12 w-12 text-orange-500 animate-spin" />
-                    <div className="text-center">
-                        <p className="text-white font-antonio text-xl uppercase tracking-wide">Analyzing Environment</p>
-                        <p className="text-gray-400 text-sm mt-1">Gemini is scanning for hazards...</p>
-                    </div>
-                </div>
-            )}
+            {/* Bottom Nav Bar (Fixed) */}
+            <div className="bg-white border-t border-gray-100 py-4 px-8 flex justify-between items-center z-40 relative">
+                <NavIcon icon={Home} label="Home" onClick={() => router.push('/dashboard')} />
+                <NavIcon icon={Scan} label="Scan" active />
+                <NavIcon icon={User} label="Profile" onClick={() => router.push('/onboarding')} />
+                <NavIcon icon={Settings} label="Settings" onClick={() => router.push('/settings')} />
+            </div>
         </div>
     )
 }
+
+function NavIcon({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`flex flex-col items-center gap-1 ${active ? 'text-[#2563eb]' : 'text-gray-400 hover:text-gray-600'} transition-colors`}
+        >
+            <Icon className={`w-6 h-6 ${active ? 'fill-current' : ''}`} strokeWidth={2} />
+            <span className="text-[10px] font-medium">{label}</span>
+        </button>
+    )
+}
+

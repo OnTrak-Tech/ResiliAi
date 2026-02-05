@@ -169,19 +169,22 @@ export default function DashboardPage() {
             {/* Bottom Navigation Bar */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 py-4 px-8 flex justify-between items-center z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                 <NavIcon icon={Home} label="Home" active />
-                <NavIcon icon={Scan} label="Scan" />
-                <NavIcon icon={User} label="Profile" />
-                <NavIcon icon={Settings} label="Settings" />
+                <NavIcon icon={Scan} label="Scan" onClick={() => router.push('/vision-audit')} />
+                <NavIcon icon={User} label="Profile" onClick={() => router.push('/onboarding')} />
+                <NavIcon icon={Settings} label="Settings" onClick={() => router.push('/settings')} />
             </div>
         </div>
     )
 }
 
-function NavIcon({ icon: Icon, label, active }: { icon: any, label: string, active?: boolean }) {
+function NavIcon({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) {
     return (
-        <div className={`flex flex-col items-center gap-1 ${active ? 'text-[#1e40af]' : 'text-gray-400'}`}>
+        <button
+            onClick={onClick}
+            className={`flex flex-col items-center gap-1 ${active ? 'text-[#1e40af]' : 'text-gray-400 hover:text-gray-600'}`}
+        >
             <Icon className={`w-6 h-6 ${active ? 'fill-current' : ''}`} strokeWidth={2} />
             <span className="text-[10px] font-medium">{label}</span>
-        </div>
+        </button>
     )
 }
