@@ -40,7 +40,6 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                 <Button variant="ghost" size="icon" className="text-gray-900 -ml-2">
                     <ArrowLeft className="h-6 w-6" strokeWidth={2} />
                 </Button>
-                <h1 className="text-lg font-bold">ResiliAI</h1>
                 <div className="w-10" /> {/* Spacer for centering */}
             </div>
 
@@ -54,8 +53,8 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                         <div
                             onClick={() => setHousingType('house')}
                             className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${profile.housingType === 'house'
-                                    ? 'ring-4 ring-blue-500 scale-[1.02]'
-                                    : 'hover:opacity-90'
+                                ? 'ring-4 ring-blue-500 scale-[1.02]'
+                                : 'hover:opacity-90'
                                 }`}
                         >
                             <Image
@@ -79,8 +78,8 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                         <div
                             onClick={() => setHousingType('apartment')}
                             className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${profile.housingType === 'apartment'
-                                    ? 'ring-4 ring-blue-500 scale-[1.02]'
-                                    : 'hover:opacity-90'
+                                ? 'ring-4 ring-blue-500 scale-[1.02]'
+                                : 'hover:opacity-90'
                                 }`}
                         >
                             <Image
