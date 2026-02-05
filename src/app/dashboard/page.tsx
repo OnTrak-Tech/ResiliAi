@@ -1,46 +1,30 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Shield, Sun, CheckCircle, Home, Activity, User, Settings, Camera, Phone, Users } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
+import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/store/userStore'
-import { motion } from 'framer-motion'
-import { WeatherWidget } from '@/components/features/WeatherWidget'
-import { AlertsWidget } from '@/components/features/AlertsWidget'
-import { DailyTaskCard } from '@/components/features/DailyTaskCard'
+import { useWeatherStore } from '@/store/weatherStore'
+import { useTaskStore } from '@/store/taskStore'
 
-// --- Nav Items ---
-const NAV_ITEMS = [
-    { id: 'home', icon: Home, active: true },
-    { id: 'stats', icon: Activity, active: false },
-    { id: 'profile', icon: User, active: false },
-    { id: 'settings', icon: Settings, active: false },
-]
-
-// --- Custom Components ---
-
-// Status Card for Bento Grid
-const StatusCard = ({ title, value, icon, color }: { title: string, value: string, icon: React.ReactNode, color: string }) => (
-    <Card className="bg-white/5 backdrop-blur-md border-white/10 hover:border-orange-500/30 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] flex flex-col justify-between">
-        <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-400 flex items-center gap-2">
-                {icon}
-                {title}
-            </CardTitle>
-        </CardHeader>
-        <CardContent>
-            <p className="text-xl font-bold font-antonio tracking-wide">{value}</p>
-        </CardContent>
-    </Card>
-)
+// --- Helper Functions ---
+const getWeatherIcon = (temp: number, condition: string) => {
+    // Simple logic mapping
+    const c = condition.toLowerCase()
+    if (c.includes('rain')) return <CloudRain className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+    if (c.includes('cloud')) return <Cloud className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+    if (c.includes('snow')) return <CloudSnow className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+    if (c.includes('clear') || c.includes('sun')) return <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+    return <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+}
 
 export default function DashboardPage() {
     const router = useRouter()
     const { profile } = useUserStore()
+    const { weather, fetchWeather } = useWeatherStore()
+    const { tasks, generateDailyTasks } = useTaskStore()
 
     useEffect(() => {
         if (!profile.onboardingComplete) {
@@ -48,165 +32,156 @@ export default function DashboardPage() {
         }
     }, [profile.onboardingComplete, router])
 
-    const getScoreColor = () => {
-        if (profile.resilienceScore >= 70) return 'text-green-500'
-        if (profile.resilienceScore >= 40) return 'text-orange-500'
-        return 'text-red-500'
-    }
+    useEffect(() => {
+        if (profile.location) {
+            fetchWeather(profile.location)
+        }
+        // Generate daily tasks based on profile if empty
+        if (tasks.length === 0) {
+            generateDailyTasks(profile, weather)
+        }
+    }, [profile, weather, tasks.length, fetchWeather, generateDailyTasks])
+
+    // Get the first incomplete task for display
+    const currentTask = tasks.find(t => !t.completed) || tasks[0]
 
     return (
-        <div className="min-h-screen bg-black text-white p-4 relative overflow-hidden font-sans">
-            {/* Background Reuse */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-black to-black opacity-80 pointer-events-none" />
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
+        <div className="min-h-screen bg-gray-50 text-gray-900 pb-24 font-sans flex flex-col items-center">
 
-            <header className="flex justify-between items-center py-4 mb-6 relative z-10">
-                <div className="relative h-8 w-32">
-                    <Image
-                        src="/icons/resiliai-logo.png"
-                        alt="ResiliAi"
-                        fill
-                        className="object-contain object-left"
-                    />
-                </div>
-                <div className="w-10 h-10 rounded-full border border-white/20 bg-gray-800 flex items-center justify-center overflow-hidden">
-                    {/* Avatar Placeholder */}
-                    <span className="font-bold text-gray-400">{profile.name ? profile.name[0] : 'U'}</span>
-                </div>
+            {/* Header: Centered Logo Text */}
+            <header className="w-full pt-8 pb-4 flex justify-center items-center relative bg-gray-50">
+                <h1 className="text-3xl font-bold text-[#2563eb] tracking-tight">ResiliAI</h1>
             </header>
 
-            <main className="grid grid-cols-2 gap-4 relative z-10">
-                {/* Score Card - Gauge Style */}
-                <Card className="col-span-2 bg-gradient-to-b from-gray-900/80 to-black/80 border-white/10 backdrop-blur-xl relative overflow-hidden">
-                    <CardContent className="flex items-center gap-6 p-6">
-                        <div className="relative w-28 h-28 flex-shrink-0">
-                            <svg className="w-full h-full transform -rotate-90">
-                                {/* Defs for Gradient */}
-                                <defs>
-                                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#ef4444" />
-                                        <stop offset="50%" stopColor="#f97316" />
-                                        <stop offset="100%" stopColor="#22c55e" />
-                                    </linearGradient>
-                                </defs>
-                                <circle
-                                    cx="56"
-                                    cy="56"
-                                    r="48"
-                                    stroke="currentColor"
-                                    strokeWidth="8"
-                                    fill="none"
-                                    className="text-gray-800"
-                                />
-                                <circle
-                                    cx="56"
-                                    cy="56"
-                                    r="48"
-                                    stroke="url(#scoreGradient)"
-                                    strokeWidth="8"
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    className="drop-shadow-[0_0_8px_currentColor]"
-                                    strokeDasharray={2 * Math.PI * 48}
-                                    strokeDashoffset={(1 - profile.resilienceScore / 100) * 2 * Math.PI * 48}
-                                />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className={`text-3xl font-bold font-antonio ${getScoreColor()} drop-shadow-md`}>
-                                    {profile.resilienceScore}
-                                </span>
-                                <span className="text-[10px] uppercase text-gray-500 tracking-wider">Score</span>
-                            </div>
+            <main className="w-full max-w-md px-6 space-y-4">
+
+                {/* 1. Resilience Score Card */}
+                <Card className="p-6 rounded-2xl border-none shadow-sm bg-white">
+                    <div className="flex justify-between items-end mb-2">
+                        <span className="text-sm font-bold text-gray-900 uppercase tracking-wide">Resilience Score</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-gray-900">{profile.resilienceScore}</span>
+                            <span className="text-gray-400 text-sm font-medium">/100</span>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold font-antonio tracking-wide text-white uppercase mb-1">Resilience Level</h3>
-                            <p className="text-gray-400 text-xs">Based on location & profile.</p>
-                            <div className="mt-3 flex gap-2">
-                                <Badge variant="outline" className="text-[10px] border-white/20 text-gray-300">
-                                    Prepared
-                                </Badge>
-                                <Badge variant="outline" className="text-[10px] border-orange-500/50 text-orange-400">
-                                    Action Needed
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardContent>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
+                        <div
+                            className="h-full bg-[#2563eb] rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${profile.resilienceScore}%` }}
+                        />
+                    </div>
+                    <p className="text-xs font-medium text-gray-900">
+                        {profile.resilienceScore >= 70 ? 'Excellent Preparedness' :
+                            profile.resilienceScore >= 40 ? 'Good Start' : 'Action Needed'}
+                    </p>
                 </Card>
 
-                {/* Weather Widget */}
-                <WeatherWidget compact />
+                {/* 2. Status Row (Weather, Alerts, Daily Task) */}
+                <div className="grid grid-cols-3 gap-3">
 
-                {/* Alerts Widget */}
-                <AlertsWidget compact />
+                    {/* Weather Card */}
+                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl">
+                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Weather</span>
+                        <div className="flex flex-col items-center my-auto">
+                            {weather ? getWeatherIcon(weather.temp, weather.condition) : <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />}
+                            <span className="text-xl font-bold text-gray-900">{weather ? Math.round(weather.temp) : '--'}°C</span>
+                            <span className="text-[10px] text-gray-500 font-medium leading-tight mt-1 line-clamp-2">
+                                {weather ? weather.condition : 'Loading...'}
+                            </span>
+                        </div>
+                    </Card>
 
-                {/* Main Action Area - Daily Task */}
-                <DailyTaskCard />
+                    {/* Alerts Card */}
+                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl">
+                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Alerts</span>
+                        <div className="flex flex-col items-center my-auto">
+                            <Shield className="text-green-500 h-8 w-8 mb-2 fill-green-100" />
+                            <span className="text-sm font-medium text-gray-900">All Clear</span>
+                        </div>
+                    </Card>
 
-                {/* Vision Audit Card */}
-                <Card
+                    {/* Daily Task Card */}
+                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl relative overflow-hidden">
+                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Daily Task</span>
+                        <div className="flex flex-col items-center my-auto w-full">
+                            <div className="bg-green-500 rounded-full p-1 mb-2">
+                                <CheckCircle className="text-white h-5 w-5" strokeWidth={3} />
+                            </div>
+                            <p className="text-[10px] font-medium text-gray-900 leading-tight line-clamp-3 px-1">
+                                {currentTask ? currentTask.title : 'Check Supplies'}
+                            </p>
+                            {/* Checkbox Placeholder for visual */}
+                            <div className="w-4 h-4 border-2 border-gray-300 rounded mt-2" />
+                        </div>
+                    </Card>
+                </div>
+
+                {/* 3. High Priority Action Buttons */}
+
+                {/* Vision Audit */}
+                <Button
+                    variant="default"
+                    className="w-full h-20 bg-[#2563eb] hover:bg-[#1d4ed8] rounded-xl flex items-center justify-start px-6 shadow-lg shadow-blue-500/20 relative group overflow-hidden"
                     onClick={() => router.push('/vision-audit')}
-                    className="bg-cyan-600/10 border-cyan-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-cyan-600/20 transition-colors cursor-pointer group"
                 >
-                    <div className="mb-2 bg-cyan-500/20 p-2 rounded-full group-hover:bg-cyan-500/30 transition-colors">
-                        <Camera className="text-cyan-400 h-5 w-5" />
+                    <div className="mr-6 border-2 border-white/30 rounded-lg p-2">
+                        <Camera className="w-8 h-8 text-white" />
                     </div>
-                    <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest">Vision Audit</p>
-                    <p className="text-white/60 text-[10px] mt-1 uppercase">Scan Home</p>
-                </Card>
+                    <div className="flex flex-col items-start text-white">
+                        <span className="text-lg font-bold uppercase tracking-wide">Vision Audit</span>
+                        <span className="text-xs text-blue-100 font-medium tracking-wider">Scan Home</span>
+                    </div>
+                </Button>
 
-                {/* Voice Companion SOS Card */}
-                <Card
-                    onClick={() => router.push('/voice-companion')}
-                    className="bg-red-600/10 border-red-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-red-600/20 transition-colors cursor-pointer group animate-pulse"
+                {/* SOS Guardian */}
+                <Button
+                    variant="default"
+                    className="w-full h-20 bg-[#ef4444] hover:bg-[#dc2626] rounded-xl flex items-center justify-start px-6 shadow-lg shadow-red-500/20 relative group overflow-hidden"
+                    onClick={() => router.push('/sos-guardian')}
                 >
-                    <div className="mb-2 bg-red-500/20 p-2 rounded-full group-hover:bg-red-500/30 transition-colors">
-                        <Phone className="text-red-400 h-5 w-5" />
+                    <div className="mr-6 border-2 border-white/30 rounded-full p-2">
+                        <Phone className="w-8 h-8 text-white" />
                     </div>
-                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">SOS</p>
-                    <p className="text-white/60 text-[10px] mt-1 uppercase">Guardian</p>
-                </Card>
+                    <div className="flex flex-col items-start text-white">
+                        <span className="text-lg font-bold uppercase tracking-wide">SOS Guardian</span>
+                        <span className="text-xs text-red-100 font-medium tracking-wider">Guardian</span>
+                    </div>
+                </Button>
 
-                {/* Community Mesh Card */}
-                <Card
+                {/* Community Mesh */}
+                <Button
+                    variant="default"
+                    className="w-full h-20 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl flex items-center justify-start px-6 shadow-lg shadow-purple-500/20 relative group overflow-hidden"
                     onClick={() => router.push('/community-mesh')}
-                    className="bg-purple-600/10 border-purple-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-purple-600/20 transition-colors cursor-pointer group"
                 >
-                    <div className="mb-2 bg-purple-500/20 p-2 rounded-full group-hover:bg-purple-500/30 transition-colors">
-                        <Users className="text-purple-400 h-5 w-5" />
+                    <div className="mr-6 border-2 border-white/30 rounded-lg p-2">
+                        <Users className="w-8 h-8 text-white" />
                     </div>
-                    <p className="text-xs text-purple-400 font-bold uppercase tracking-widest">Community</p>
-                    <p className="text-white/60 text-[10px] mt-1 uppercase">Mesh Network</p>
-                </Card>
+                    <div className="flex flex-col items-start text-white">
+                        <span className="text-lg font-bold uppercase tracking-wide">Community Mesh</span>
+                        <span className="text-xs text-purple-100 font-medium tracking-wider">Mesh Network</span>
+                    </div>
+                </Button>
+
             </main>
 
-            {/* Footer Nav Dock (Reused) */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="fixed bottom-8 w-full flex justify-center px-12 z-20 pointer-events-none"
-            >
-                <div className="flex items-center justify-between w-full max-w-xs pointer-events-auto">
-                    {NAV_ITEMS.map((item) => (
-                        <div key={item.id} className="relative flex flex-col items-center group cursor-pointer" onClick={() => item.id === 'home' ? router.push('/') : null}>
-                            <item.icon
-                                size={24}
-                                className={`transition-colors duration-300 ${item.active ? 'text-gray-500 hover:text-gray-300' : 'text-cyan-400' // Inverted for dashboard demo since we are technically "Home" but user might want active state logic
-                                    } ${item.id === 'stats' ? 'text-cyan-400' : 'text-gray-500'}`} // Hacky logic to show 'Stats/Activity' as active for Dashboard
-                                strokeWidth={1.5}
-                            />
+            {/* Bottom Navigation Bar */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 py-4 px-8 flex justify-between items-center z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                <NavIcon icon={Home} label="Home" active />
+                <NavIcon icon={Scan} label="Scan" />
+                <NavIcon icon={User} label="Profile" />
+                <NavIcon icon={Settings} label="Settings" />
+            </div>
+        </div>
+    )
+}
 
-                            {/* Active Indicator for Stats (Dashboard) */}
-                            {item.id === 'stats' && (
-                                <motion.div
-                                    layoutId="activeTab"
-                                    className="absolute -bottom-4 w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#22d3ee]"
-                                />
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </motion.div>
-        </div >
+function NavIcon({ icon: Icon, label, active }: { icon: any, label: string, active?: boolean }) {
+    return (
+        <div className={`flex flex-col items-center gap-1 ${active ? 'text-[#1e40af]' : 'text-gray-400'}`}>
+            <Icon className={`w-6 h-6 ${active ? 'fill-current' : ''}`} strokeWidth={2} />
+            <span className="text-[10px] font-medium">{label}</span>
+        </div>
     )
 }
