@@ -29,32 +29,17 @@ export default function OnboardingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
-            {/* Progress indicator */}
-            <div className="fixed top-0 left-0 right-0 z-50 p-4">
-                <div className="max-w-md mx-auto flex gap-2">
-                    {['profile', 'quiz', 'score'].map((step, index) => (
-                        <div
-                            key={step}
-                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${index <= ['profile', 'quiz', 'score'].indexOf(currentStep)
-                                ? 'bg-orange-500 shadow-[0_0_8px_#f97316]'
-                                : 'bg-white/10'
-                                }`}
-                        />
-                    ))}
-                </div>
-            </div>
-
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col font-sans">
             {/* Step content */}
-            <div className="flex-1 flex items-center justify-center p-4 pt-16">
+            <div className="flex-1 flex flex-col">
                 <AnimatePresence mode="wait">
                     {currentStep === 'profile' && (
                         <motion.div
                             key="profile"
-                            initial={{ opacity: 0, x: 50 }}
+                            initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="w-full h-full"
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex-1"
                         >
                             <ProfileStep onComplete={handleProfileComplete} />
                         </motion.div>
@@ -63,10 +48,10 @@ export default function OnboardingPage() {
                     {currentStep === 'quiz' && (
                         <motion.div
                             key="quiz"
-                            initial={{ opacity: 0, x: 50 }}
+                            initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -50 }}
-                            className="w-full max-w-md"
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex-1 flex items-center justify-center p-4"
                         >
                             <QuizStep onComplete={handleQuizComplete} />
                         </motion.div>
@@ -75,10 +60,10 @@ export default function OnboardingPage() {
                     {currentStep === 'score' && (
                         <motion.div
                             key="score"
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="w-full max-w-md"
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="flex-1 flex items-center justify-center p-4"
                         >
                             <ScoreReveal score={profile.resilienceScore} onContinue={handleFinish} />
                         </motion.div>

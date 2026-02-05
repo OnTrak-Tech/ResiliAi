@@ -1,163 +1,214 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
-import { Home, Building2, Dog, Baby, Users, Zap, X, Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Dog, Baby, Users, Zap, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/store/userStore'
+import Image from 'next/image'
 
 interface QuizStepProps {
     onComplete: () => void
 }
 
-interface QuizQuestion {
-    id: string
-    question: string
-    options: {
-        value: string | boolean
-        label: string
-        icon: React.ReactNode
-    }[]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setter: (value: any) => void
-}
-
 export function QuizStep({ onComplete }: QuizStepProps) {
-    const { setHousingType, setHasPets, setHasKids, setHasElderly, setHasBackupPower } = useUserStore()
-    const [currentIndex, setCurrentIndex] = useState(0)
-    const [direction, setDirection] = useState(0)
+    const {
+        profile,
+        setHousingType,
+        setHasPets,
+        setHasKids,
+        setHasElderly,
+        setHasBackupPower
+    } = useUserStore()
 
-    const questions: QuizQuestion[] = [
-        {
-            id: 'housing',
-            question: 'Do you live in a house or apartment?',
-            options: [
-                { value: 'house', label: 'House', icon: <Home className="h-12 w-12" /> },
-                { value: 'apartment', label: 'Apartment', icon: <Building2 className="h-12 w-12" /> },
-            ],
-            setter: setHousingType,
-        },
-        {
-            id: 'pets',
-            question: 'Do you have pets?',
-            options: [
-                { value: true, label: 'Yes', icon: <Dog className="h-12 w-12" /> },
-                { value: false, label: 'No', icon: <X className="h-12 w-12" /> },
-            ],
-            setter: setHasPets,
-        },
-        {
-            id: 'kids',
-            question: 'Do you have children at home?',
-            options: [
-                { value: true, label: 'Yes', icon: <Baby className="h-12 w-12" /> },
-                { value: false, label: 'No', icon: <X className="h-12 w-12" /> },
-            ],
-            setter: setHasKids,
-        },
-        {
-            id: 'elderly',
-            question: 'Do you care for elderly family members?',
-            options: [
-                { value: true, label: 'Yes', icon: <Users className="h-12 w-12" /> },
-                { value: false, label: 'No', icon: <X className="h-12 w-12" /> },
-            ],
-            setter: setHasElderly,
-        },
-        {
-            id: 'power',
-            question: 'Do you have backup power?',
-            options: [
-                { value: true, label: 'Yes', icon: <Zap className="h-12 w-12" /> },
-                { value: false, label: 'No', icon: <X className="h-12 w-12" /> },
-            ],
-            setter: setHasBackupPower,
-        },
-    ]
+    // Local state for the form to allow visual toggling before committing if needed,
+    // though directing binding to store is fine here as per previous pattern.
+    // Using direct store access for simplicity and consistency.
 
-    const currentQuestion = questions[currentIndex]
+    const [isValid, setIsValid] = useState(false)
 
-    const handleSelect = (value: string | boolean) => {
-        currentQuestion.setter(value)
-        setDirection(1)
-
-        if (currentIndex < questions.length - 1) {
-            setTimeout(() => setCurrentIndex(currentIndex + 1), 300)
-        } else {
-            setTimeout(onComplete, 300)
-        }
-    }
-
-    const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        if (Math.abs(info.offset.x) > 100) {
-            const isRight = info.offset.x > 0
-            const options = currentQuestion.options
-            // Swipe right = first option, left = second option
-            handleSelect(isRight ? options[0].value : options[1].value)
-        }
-    }
+    useEffect(() => {
+        // Validation: Must select a housing type
+        setIsValid(profile.housingType !== 'apartment' && profile.housingType !== 'house' ? false : true)
+    }, [profile.housingType])
 
     return (
-        <div className="flex flex-col items-center">
-            {/* Question counter */}
-            <div className="text-orange-500 mb-4 text-sm">
-                {currentIndex + 1} / {questions.length}
+        <div className="flex flex-col h-full w-full max-w-md mx-auto relative bg-white text-gray-900 font-sans px-6 pt-4 pb-8">
+
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+                <Button variant="ghost" size="icon" className="text-gray-900 -ml-2">
+                    <ArrowLeft className="h-6 w-6" strokeWidth={2} />
+                </Button>
+                <div className="w-10" /> {/* Spacer for centering */}
             </div>
 
-            {/* Card stack */}
-            <div className="relative h-80 w-full">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={currentQuestion.id}
-                        initial={{ scale: 0.9, opacity: 0, x: direction * 100 }}
-                        animate={{ scale: 1, opacity: 1, x: 0 }}
-                        exit={{ scale: 0.9, opacity: 0, x: -direction * 100 }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.7}
-                        onDragEnd={handleDrag}
-                        className="absolute inset-0 cursor-grab active:cursor-grabbing"
-                    >
-                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center shadow-xl">
-                            <h2 className="text-xl font-semibold mb-8">{currentQuestion.question}</h2>
+            <div className="flex-1 overflow-y-auto pb-20 no-scrollbar">
+                {/* 1. Housing Type Section */}
+                <section className="mb-10">
+                    <h2 className="text-2xl font-bold mb-6 leading-tight">What is your housing type?</h2>
 
-                            <div className="flex gap-6">
-                                {currentQuestion.options.map((option) => (
-                                    <motion.button
-                                        key={String(option.value)}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => handleSelect(option.value)}
-                                        className="flex flex-col items-center gap-3 p-6 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-orange-500 transition-all"
-                                    >
-                                        <div className="text-orange-500">{option.icon}</div>
-                                        <span className="text-sm font-medium">{option.label}</span>
-                                    </motion.button>
-                                ))}
-                            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* House Option */}
+                        <div
+                            onClick={() => setHousingType('house')}
+                            className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${profile.housingType === 'house'
+                                ? 'ring-4 ring-blue-500 scale-[1.02]'
+                                : 'hover:opacity-90'
+                                }`}
+                        >
+                            <Image
+                                src="/icons/house-card.png"
+                                alt="House"
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <span className="absolute bottom-4 left-4 text-white font-bold text-lg">House</span>
+
+                            {/* Selected Checkmark */}
+                            {profile.housingType === 'house' && (
+                                <div className="absolute top-3 right-3 bg-blue-500 rounded-full p-1">
+                                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                                </div>
+                            )}
                         </div>
-                    </motion.div>
-                </AnimatePresence>
+
+                        {/* Apartment Option */}
+                        <div
+                            onClick={() => setHousingType('apartment')}
+                            className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${profile.housingType === 'apartment'
+                                ? 'ring-4 ring-blue-500 scale-[1.02]'
+                                : 'hover:opacity-90'
+                                }`}
+                        >
+                            <Image
+                                src="/icons/apartment-card.png"
+                                alt="Apartment"
+                                fill
+                                className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <span className="absolute bottom-4 left-4 text-white font-bold text-lg">Apartment</span>
+
+                            {/* Selected Checkmark */}
+                            {profile.housingType === 'apartment' && (
+                                <div className="absolute top-3 right-3 bg-blue-500 rounded-full p-1">
+                                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* 2. Household Details Section */}
+                <section>
+                    <h2 className="text-xl font-bold mb-6 leading-snug px-1">
+                        Do you have pets, kids, or elderly family?
+                    </h2>
+
+                    <div className="space-y-4">
+                        {/* Pets Toggle */}
+                        <ToggleCard
+                            icon={Dog}
+                            iconColor="text-blue-500"
+                            bgIcon="bg-blue-100"
+                            label="Pets"
+                            sublabel="Dogs, cats, or other animals"
+                            checked={!!profile.hasPets}
+                            onChange={setHasPets}
+                        />
+
+                        {/* Children Toggle */}
+                        <ToggleCard
+                            icon={Baby}
+                            iconColor="text-blue-500"
+                            bgIcon="bg-blue-100"
+                            label="Children"
+                            sublabel="Kids under 12 years old"
+                            checked={!!profile.hasKids}
+                            onChange={setHasKids}
+                        />
+
+                        {/* Elderly Toggle */}
+                        <ToggleCard
+                            icon={Users}
+                            iconColor="text-blue-500"
+                            bgIcon="bg-blue-100"
+                            label="Elderly Family"
+                            sublabel="Seniors needing assistance"
+                            checked={!!profile.hasElderly}
+                            onChange={setHasElderly}
+                        />
+
+                        {/* Backup Power Toggle - NEW */}
+                        <ToggleCard
+                            icon={Zap}
+                            iconColor="text-yellow-500"
+                            bgIcon="bg-yellow-100"
+                            label="Backup Power"
+                            sublabel="Generators or battery storage"
+                            checked={!!profile.hasBackupPower}
+                            onChange={setHasBackupPower}
+                        />
+                    </div>
+                </section>
             </div>
 
-            {/* Swipe hint */}
-            <p className="text-gray-500 text-sm mt-4">
-                Swipe or tap to answer
-            </p>
+            {/* Sticky Bottom Button */}
+            <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent pt-12 z-10 w-full max-w-md mx-auto">
+                <Button
+                    onClick={onComplete}
+                    disabled={!isValid}
+                    className="w-full h-14 bg-[#1e40af] hover:bg-[#1e3a8a] text-white font-semibold text-lg rounded-full shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:shadow-none transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                    Continue
+                    <ArrowRight className="w-5 h-5" />
+                </Button>
+            </div>
+        </div>
+    )
+}
 
-            {/* Action buttons */}
-            <div className="flex gap-8 mt-6">
-                <button
-                    onClick={() => handleSelect(currentQuestion.options[1].value)}
-                    className="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center hover:bg-red-500/30 transition-all"
-                >
-                    <X className="h-8 w-8 text-red-500" />
-                </button>
-                <button
-                    onClick={() => handleSelect(currentQuestion.options[0].value)}
-                    className="w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center hover:bg-green-500/30 transition-all"
-                >
-                    <Check className="h-8 w-8 text-green-500" />
-                </button>
+// Sub-component for clean toggle cards
+function ToggleCard({
+    icon: Icon,
+    iconColor,
+    bgIcon,
+    label,
+    sublabel,
+    checked,
+    onChange
+}: {
+    icon: any,
+    iconColor: string,
+    bgIcon: string,
+    label: string,
+    sublabel: string,
+    checked: boolean,
+    onChange: (val: boolean) => void
+}) {
+    return (
+        <div
+            onClick={() => onChange(!checked)}
+            className={`flex items-center p-4 rounded-2xl border transition-all cursor-pointer ${checked ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 bg-white hover:border-blue-200'
+                }`}
+        >
+            {/* Icon Box */}
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 shrink-0 ${bgIcon}`}>
+                <Icon className={`w-6 h-6 ${iconColor}`} />
+            </div>
+
+            {/* Text Content */}
+            <div className="flex-1">
+                <h3 className="font-bold text-gray-900 text-base">{label}</h3>
+                <p className="text-gray-500 text-sm leading-tight">{sublabel}</p>
+            </div>
+
+            {/* Checkbox Visual */}
+            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${checked ? 'bg-blue-500 border-blue-500' : 'border-gray-300'
+                }`}>
+                {checked && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
             </div>
         </div>
     )
