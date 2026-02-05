@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Shield, Sun, CheckCircle, Home, Activity, User, Settings, Camera, Phone } from 'lucide-react'
+import { Shield, Sun, CheckCircle, Home, Activity, User, Settings, Camera, Phone, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -164,6 +164,18 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-xs text-red-400 font-bold uppercase tracking-widest">SOS</p>
                     <p className="text-white/60 text-[10px] mt-1 uppercase">Guardian</p>
+                </Card>
+
+                {/* Community Mesh Card */}
+                <Card
+                    onClick={() => router.push('/community-mesh')}
+                    className="bg-purple-600/10 border-purple-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-purple-600/20 transition-colors cursor-pointer group"
+                >
+                    <div className="mb-2 bg-purple-500/20 p-2 rounded-full group-hover:bg-purple-500/30 transition-colors">
+                        <Users className="text-purple-400 h-5 w-5" />
+                    </div>
+                    <p className="text-xs text-purple-400 font-bold uppercase tracking-widest">Community</p>
+                    <p className="text-white/60 text-[10px] mt-1 uppercase">Mesh Network</p>
                 </Card>
             </main>
 
