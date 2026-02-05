@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
     Users, Radio, Wifi, MessageCircle, Heart,
     ChevronLeft, MapPin, Clock, Check, AlertTriangle,
-    Home, Scan, User, Settings as SettingsIcon, MoreVertical
+    Home, Scan, User, Settings as SettingsIcon, MoreVertical, Send
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
