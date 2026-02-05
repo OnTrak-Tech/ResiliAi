@@ -12,11 +12,11 @@ import { WeatherData } from '@/types/weather'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export function DailyTaskCard() {
-    const { currentTask, setCurrentTask, completeTask, shouldGenerateNewTask, completedTaskIds } = useTaskStore()
+    const { currentTask, generateDailyTasks, completeTask, completedTaskIds, tasks } = useTaskStore()
     const { profile } = useUserStore()
     const [weather, setWeather] = useState<WeatherData | null>(null)
     const [loading, setLoading] = useState(true)
-    const [reason, setReason] = useState<string>('Daily preparedness check')
+    // const [reason, setReason] = useState<string>('Daily preparedness check') // Simplifying to avoid complex prop drilling for now
 
     useEffect(() => {
         async function initializeTask() {
@@ -40,104 +40,74 @@ export function DailyTaskCard() {
             }
 
             // Generate new task if needed
-            if (shouldGenerateNewTask()) {
-                const newTask = generateDailyTask(weatherData, profile, completedTaskIds)
-                setCurrentTask(newTask)
-                setReason(getTaskReason(newTask, weatherData))
-            } else if (currentTask) {
-                setReason(getTaskReason(currentTask, weatherData))
+            // Use store logic instead of local checks
+            if (!currentTask || currentTask.completed) {
+                generateDailyTasks(profile, weatherData)
             }
 
             setLoading(false)
         }
 
         initializeTask()
-    }, [])
+    }, [currentTask, generateDailyTasks, profile]) // Dependencies updated
 
     const handleComplete = () => {
-        completeTask()
+        if (currentTask) {
+            completeTask(currentTask.id)
+        }
     }
 
     if (loading) {
         return (
-            <Card className="col-span-2 bg-orange-600/10 border-orange-500/40 flex flex-col justify-center items-center p-6 backdrop-blur-sm">
-                <Loader2 className="h-6 w-6 text-orange-400 animate-spin" />
-                <p className="text-xs text-orange-400 mt-2">Generating your task...</p>
+            // Matching the new light theme style even in loading
+            <Card className="col-span-1 aspect-[4/5] bg-white border-gray-100 flex flex-col justify-center items-center p-3 shadow-sm rounded-2xl">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
             </Card>
         )
     }
 
     if (!currentTask) {
         return (
-            <Card className="col-span-2 bg-green-600/10 border-green-500/40 flex flex-col justify-center items-center p-6 backdrop-blur-sm">
-                <CheckCircle className="text-green-500 h-8 w-8" />
-                <p className="text-xs text-green-400 mt-2 uppercase tracking-widest">All tasks complete!</p>
+            <Card className="col-span-1 aspect-[4/5] bg-white border-gray-100 flex flex-col justify-center items-center p-3 shadow-sm rounded-2xl">
+                <CheckCircle className="text-green-500 h-6 w-6" />
+                <p className="text-[10px] text-gray-500 mt-2 font-medium">All done!</p>
             </Card>
         )
     }
 
-    const priorityColors = {
-        low: 'text-gray-400 border-gray-500/40 bg-gray-600/10',
-        medium: 'text-orange-400 border-orange-500/40 bg-orange-600/10',
-        high: 'text-red-400 border-red-500/40 bg-red-600/10',
-        urgent: 'text-red-500 border-red-600/50 bg-red-600/20',
-    }
+    // Reuse the layout from the main dashboard refactor plan for consistency if used there, 
+    // OR keep this as the "Detailed" view if this component is used elsewhere?
+    // The previous file content shows this is used in the Bento Grid (DailyTaskCard).
+    // The Dashboard Page refactor I just did replaces this usage with an inline card.
+    // However, to fix the BUILD, I must fix this component regardless of usage.
+
+    // I will simplify this to match the inline style I put in dashboard/page.tsx to be safe and consistent
+    // IF it is being used.
 
     return (
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={currentTask.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="col-span-2"
-            >
-                <Card className={`${priorityColors[currentTask.priority]} flex flex-col justify-center items-center p-6 backdrop-blur-sm transition-all ${currentTask.completed ? 'opacity-60' : ''}`}>
+        <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl relative overflow-hidden">
+            <span className="text-[10px] font-bold uppercase mb-auto pt-1">Daily Task</span>
+            <div className="flex flex-col items-center my-auto w-full">
+                <div className="bg-green-500 rounded-full p-1 mb-2">
                     {currentTask.completed ? (
-                        <div className="text-center">
-                            <CheckCircle className="text-green-500 h-8 w-8 mx-auto mb-2" />
-                            <p className="text-green-400 font-bold uppercase tracking-widest">Completed!</p>
-                            <p className="text-white/50 text-xs mt-1">{currentTask.title}</p>
-                        </div>
+                        <CheckCircle className="text-white h-5 w-5" strokeWidth={3} />
                     ) : (
-                        <>
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="bg-orange-500/20 p-2 rounded-full">
-                                    {currentTask.priority === 'urgent' ? (
-                                        <AlertTriangle className="text-red-500 h-5 w-5 animate-pulse" />
-                                    ) : (
-                                        <CheckCircle className="text-orange-500 h-5 w-5" />
-                                    )}
-                                </div>
-                            </div>
-                            <p className="text-xs text-orange-400 font-bold uppercase tracking-widest mb-1">
-                                Daily Task
-                            </p>
-                            <p className="text-center font-bold text-lg font-antonio tracking-wide text-white">
-                                {currentTask.title}
-                            </p>
-                            <p className="text-white/50 text-xs mt-2 text-center uppercase tracking-wider">
-                                {reason}
-                            </p>
-                            <div className="flex items-center gap-4 mt-4">
-                                <div className="flex items-center gap-1 text-white/40 text-xs">
-                                    <Clock className="h-3 w-3" />
-                                    {currentTask.estimatedMinutes} min
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleComplete}
-                                    className="text-green-400 hover:text-green-300 hover:bg-green-500/20"
-                                >
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    Done
-                                </Button>
-                            </div>
-                        </>
+                        <AlertTriangle className="text-white h-5 w-5" strokeWidth={3} /> // Or CheckCircle as target
                     )}
-                </Card>
-            </motion.div>
-        </AnimatePresence>
+                </div>
+                <p className="text-[10px] font-medium text-gray-900 leading-tight line-clamp-3 px-1">
+                    {currentTask.title}
+                </p>
+                {/* Visual Checkbox */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`mt-2 h-6 w-6 p-0 border-2 rounded ${currentTask.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}
+                    onClick={handleComplete}
+                >
+                    {currentTask.completed && <CheckCircle className="h-4 w-4 text-white" />}
+                </Button>
+            </div>
+        </Card>
     )
 }
