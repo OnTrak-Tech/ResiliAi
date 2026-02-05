@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { useUserStore } from '@/store/userStore'
 import { motion } from 'framer-motion'
 import { WeatherWidget } from '@/components/features/WeatherWidget'
+import { AlertsWidget } from '@/components/features/AlertsWidget'
 
 // --- Nav Items ---
 const NAV_ITEMS = [
@@ -133,12 +134,9 @@ export default function DashboardPage() {
 
                 {/* Weather Widget */}
                 <WeatherWidget compact />
-                <StatusCard
-                    title="Alerts"
-                    value="None"
-                    icon={<Shield className="text-green-400 h-4 w-4" />}
-                    color="green"
-                />
+
+                {/* Alerts Widget */}
+                <AlertsWidget compact />
 
                 {/* Main Action Area - Daily Task */}
                 <Card className="col-span-2 bg-orange-600/10 border-orange-500/40 flex flex-col justify-center items-center p-6 backdrop-blur-sm hover:bg-orange-600/20 transition-colors">
