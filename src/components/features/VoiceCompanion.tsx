@@ -75,9 +75,9 @@ export function VoiceCompanion({ onClose }: VoiceCompanionProps) {
         recognition.interimResults = true
         recognition.lang = 'en-US'
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-            const transcript = Array.from(event.results)
-                .map((result) => result[0].transcript)
+        recognition.onresult = (event: any) => {
+            const transcript = Array.from(event.results as ArrayLike<any>)
+                .map((result: any) => result[0].transcript)
                 .join('')
             setCurrentTranscript(transcript)
 
@@ -88,7 +88,7 @@ export function VoiceCompanion({ onClose }: VoiceCompanionProps) {
             }
         }
 
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        recognition.onerror = (event: any) => {
             console.error('Speech recognition error:', event.error)
             if (event.error !== 'no-speech') {
                 setError(`Voice error: ${event.error}`)
