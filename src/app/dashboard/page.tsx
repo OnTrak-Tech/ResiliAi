@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { useUserStore } from '@/store/userStore'
 import { motion } from 'framer-motion'
+import { WeatherWidget } from '@/components/features/WeatherWidget'
 
 // --- Nav Items ---
 const NAV_ITEMS = [
@@ -130,13 +131,8 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Status Widgets */}
-                <StatusCard
-                    title="Weather"
-                    value="22°C Clear"
-                    icon={<Sun className="text-yellow-400 h-4 w-4" />}
-                    color="yellow"
-                />
+                {/* Weather Widget */}
+                <WeatherWidget compact />
                 <StatusCard
                     title="Alerts"
                     value="None"
