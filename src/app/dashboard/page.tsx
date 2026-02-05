@@ -11,6 +11,7 @@ import { useUserStore } from '@/store/userStore'
 import { motion } from 'framer-motion'
 import { WeatherWidget } from '@/components/features/WeatherWidget'
 import { AlertsWidget } from '@/components/features/AlertsWidget'
+import { DailyTaskCard } from '@/components/features/DailyTaskCard'
 
 // --- Nav Items ---
 const NAV_ITEMS = [
@@ -139,14 +140,7 @@ export default function DashboardPage() {
                 <AlertsWidget compact />
 
                 {/* Main Action Area - Daily Task */}
-                <Card className="col-span-2 bg-orange-600/10 border-orange-500/40 flex flex-col justify-center items-center p-6 backdrop-blur-sm hover:bg-orange-600/20 transition-colors">
-                    <div className="mb-2 bg-orange-500/20 p-2 rounded-full">
-                        <CheckCircle className="text-orange-500 h-6 w-6" />
-                    </div>
-                    <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mb-1">Daily Task</p>
-                    <p className="text-center font-bold text-lg font-antonio tracking-wide text-white">Secure Balcony Items</p>
-                    <p className="text-white/50 text-xs mt-2 text-center uppercase tracking-wider">High wind warning in effect</p>
-                </Card>
+                <DailyTaskCard />
 
                 {/* Vision Audit Card */}
                 <Card
