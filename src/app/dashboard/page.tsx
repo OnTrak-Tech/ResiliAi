@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Shield, Sun, CheckCircle, Home, Activity, User, Settings } from 'lucide-react'
+import { Shield, Sun, CheckCircle, Home, Activity, User, Settings, Camera, Phone } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
@@ -152,6 +152,30 @@ export default function DashboardPage() {
                     <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mb-1">Daily Task</p>
                     <p className="text-center font-bold text-lg font-antonio tracking-wide text-white">Secure Balcony Items</p>
                     <p className="text-white/50 text-xs mt-2 text-center uppercase tracking-wider">High wind warning in effect</p>
+                </Card>
+
+                {/* Vision Audit Card */}
+                <Card
+                    onClick={() => router.push('/vision-audit')}
+                    className="bg-cyan-600/10 border-cyan-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-cyan-600/20 transition-colors cursor-pointer group"
+                >
+                    <div className="mb-2 bg-cyan-500/20 p-2 rounded-full group-hover:bg-cyan-500/30 transition-colors">
+                        <Camera className="text-cyan-400 h-5 w-5" />
+                    </div>
+                    <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest">Vision Audit</p>
+                    <p className="text-white/60 text-[10px] mt-1 uppercase">Scan Home</p>
+                </Card>
+
+                {/* Voice Companion SOS Card */}
+                <Card
+                    onClick={() => router.push('/voice-companion')}
+                    className="bg-red-600/10 border-red-500/40 flex flex-col justify-center items-center p-4 backdrop-blur-sm hover:bg-red-600/20 transition-colors cursor-pointer group animate-pulse"
+                >
+                    <div className="mb-2 bg-red-500/20 p-2 rounded-full group-hover:bg-red-500/30 transition-colors">
+                        <Phone className="text-red-400 h-5 w-5" />
+                    </div>
+                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">SOS</p>
+                    <p className="text-white/60 text-[10px] mt-1 uppercase">Guardian</p>
                 </Card>
             </main>
 
