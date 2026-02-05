@@ -115,7 +115,7 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                             bgIcon="bg-blue-100"
                             label="Pets"
                             sublabel="Dogs, cats, or other animals"
-                            checked={profile.hasPets}
+                            checked={!!profile.hasPets}
                             onChange={setHasPets}
                         />
 
@@ -126,7 +126,7 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                             bgIcon="bg-blue-100"
                             label="Children"
                             sublabel="Kids under 12 years old"
-                            checked={profile.hasKids}
+                            checked={!!profile.hasKids}
                             onChange={setHasKids}
                         />
 
@@ -137,7 +137,7 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                             bgIcon="bg-blue-100"
                             label="Elderly Family"
                             sublabel="Seniors needing assistance"
-                            checked={profile.hasElderly}
+                            checked={!!profile.hasElderly}
                             onChange={setHasElderly}
                         />
 
@@ -148,7 +148,7 @@ export function QuizStep({ onComplete }: QuizStepProps) {
                             bgIcon="bg-yellow-100"
                             label="Backup Power"
                             sublabel="Generators or battery storage"
-                            checked={profile.hasBackupPower}
+                            checked={!!profile.hasBackupPower}
                             onChange={setHasBackupPower}
                         />
                     </div>
