@@ -31,6 +31,7 @@ interface UserStore {
     calculateResilienceScore: () => void
     completeOnboarding: () => void
     resetProfile: () => void
+    detectLocation: () => Promise<void>
 }
 
 const initialProfile: UserProfile = {
@@ -98,6 +99,36 @@ export const useUserStore = create<UserStore>()(
                 score = Math.max(0, Math.min(100, score))
 
                 set((state) => ({ profile: { ...state.profile, resilienceScore: score } }))
+            },
+
+            detectLocation: async () => {
+                if (!navigator.geolocation) return
+
+                try {
+                    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject)
+                    })
+
+                    const { latitude, longitude } = position.coords
+                    const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY
+
+                    if (!API_KEY) {
+                        console.warn("Missing API Key for reverse geocoding")
+                        return
+                    }
+
+                    // Reverse Geocoding to get City Name
+                    const res = await fetch(`http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`)
+                    const data = await res.json()
+
+                    if (data && data.length > 0) {
+                        const city = data[0].name
+                        set((state) => ({ profile: { ...state.profile, location: city } }))
+                    }
+                } catch (error) {
+                    // Silently fail, forcing user to enter manually
+                    console.log("Location detection denied or failed:", error)
+                }
             },
 
             completeOnboarding: () => {
