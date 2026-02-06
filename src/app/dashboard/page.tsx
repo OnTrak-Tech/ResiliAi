@@ -50,32 +50,32 @@ export default function DashboardPage() {
     const topAlert = hasAlerts ? alerts[0] : null
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 pb-24 font-sans flex flex-col items-center">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 pb-24 font-sans flex flex-col items-center transition-colors duration-300">
 
             {/* Header: Centered Logo Text */}
-            <header className="w-full pt-8 pb-4 flex justify-center items-center relative bg-gray-50">
-                <h1 className="text-3xl font-bold text-[#2563eb] tracking-tight">ResiliAI</h1>
+            <header className="w-full pt-8 pb-4 flex justify-center items-center relative bg-gray-50 dark:bg-slate-950 transition-colors">
+                <h1 className="text-3xl font-bold text-[#2563eb] dark:text-[#3b82f6] tracking-tight">ResiliAI</h1>
             </header>
 
             <main className="w-full max-w-md px-6 space-y-4">
 
                 {/* 1. Resilience Score Card */}
-                <Card className="p-6 rounded-2xl border-none shadow-sm bg-white">
+                <Card className="p-6 rounded-2xl border-none shadow-sm bg-white dark:bg-slate-900 transition-colors">
                     <div className="flex justify-between items-end mb-2">
-                        <span className="text-sm font-bold text-gray-900 uppercase tracking-wide">Resilience Score</span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">Resilience Score</span>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-gray-900">{profile.resilienceScore}</span>
+                            <span className="text-2xl font-bold text-gray-900 dark:text-white">{profile.resilienceScore}</span>
                             <span className="text-gray-400 text-sm font-medium">/100</span>
                         </div>
                     </div>
                     {/* Progress Bar */}
-                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
+                    <div className="h-3 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
                         <div
-                            className="h-full bg-[#2563eb] rounded-full transition-all duration-1000 ease-out"
+                            className="h-full bg-[#2563eb] dark:bg-[#3b82f6] rounded-full transition-all duration-1000 ease-out"
                             style={{ width: `${profile.resilienceScore}%` }}
                         />
                     </div>
-                    <p className="text-xs font-medium text-gray-900">
+                    <p className="text-xs font-medium text-gray-900 dark:text-gray-300">
                         {profile.resilienceScore >= 70 ? 'Excellent Preparedness' :
                             profile.resilienceScore >= 40 ? 'Good Start' : 'Action Needed'}
                     </p>
@@ -85,56 +85,56 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-3 gap-3">
 
                     {/* Weather Card */}
-                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl">
-                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Weather</span>
+                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900 border-none shadow-sm rounded-2xl transition-colors">
+                        <span className="text-[10px] font-bold uppercase mb-auto pt-1 text-gray-900 dark:text-gray-400">Weather</span>
                         <div className="flex flex-col items-center my-auto">
                             {weather ? (
                                 <>
                                     {/* Enforcing w-8 h-8 to match other cards */}
                                     {weather.icon ?
                                         <div className="h-8 w-8 mb-2 relative">
-                                            <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.condition} className="object-contain w-full h-full transform scale-125" />
+                                            <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.condition} className="object-contain w-full h-full transform scale-125 saturate-150" />
                                         </div>
                                         : getWeatherIcon(weather.temp, weather.condition)
                                     }
-                                    <span className="text-xl font-bold text-gray-900">{Math.round(weather.temp)}°C</span>
-                                    <span className="text-[10px] text-gray-500 font-medium leading-tight mt-1 line-clamp-2 px-1">
+                                    <span className="text-xl font-bold text-gray-900 dark:text-white">{Math.round(weather.temp)}°C</span>
+                                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-tight mt-1 line-clamp-2 px-1">
                                         {weather.condition}
                                     </span>
                                 </>
                             ) : (
                                 <>
-                                    <Sun className="text-gray-300 h-8 w-8 mb-2 animate-pulse" />
-                                    <span className="text-sm text-gray-400">Wait...</span>
+                                    <Sun className="text-gray-300 dark:text-gray-600 h-8 w-8 mb-2 animate-pulse" />
+                                    <span className="text-sm text-gray-400 dark:text-gray-500">Wait...</span>
                                 </>
                             )}
                         </div>
                     </Card>
 
                     {/* Alerts Card */}
-                    <Card className={`aspect-[4/5] p-3 flex flex-col items-center justify-center text-center border-none shadow-sm rounded-2xl ${hasAlerts ? 'bg-red-50' : 'bg-white'}`}>
-                        <span className={`text-[10px] font-bold uppercase mb-auto pt-1 ${hasAlerts ? 'text-red-600' : 'text-gray-900'}`}>Alerts</span>
+                    <Card className={`aspect-[4/5] p-3 flex flex-col items-center justify-center text-center border-none shadow-sm rounded-2xl transition-colors ${hasAlerts ? 'bg-red-50 dark:bg-red-950/30' : 'bg-white dark:bg-slate-900'}`}>
+                        <span className={`text-[10px] font-bold uppercase mb-auto pt-1 ${hasAlerts ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-400'}`}>Alerts</span>
                         <div className="flex flex-col items-center my-auto">
                             {hasAlerts ? (
-                                <Shield className="text-red-500 h-8 w-8 mb-2 fill-red-100 animate-pulse" />
+                                <Shield className="text-red-500 h-8 w-8 mb-2 fill-red-100 dark:fill-red-900/50 animate-pulse" />
                             ) : (
-                                <Shield className="text-green-500 h-8 w-8 mb-2 fill-green-100" />
+                                <Shield className="text-green-500 h-8 w-8 mb-2 fill-green-100 dark:fill-green-900/50" />
                             )}
-                            <span className={`text-sm font-medium ${hasAlerts ? 'text-red-700' : 'text-gray-900'} leading-tight line-clamp-2`}>
+                            <span className={`text-sm font-medium ${hasAlerts ? 'text-red-700 dark:text-red-300' : 'text-gray-900 dark:text-gray-300'} leading-tight line-clamp-2`}>
                                 {hasAlerts ? topAlert?.event : 'All Clear'}
                             </span>
                         </div>
                     </Card>
 
                     {/* Daily Task Card */}
-                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl relative overflow-hidden">
-                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Daily Task</span>
+                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900 border-none shadow-sm rounded-2xl relative overflow-hidden transition-colors">
+                        <span className="text-[10px] font-bold uppercase mb-auto pt-1 text-gray-900 dark:text-gray-400">Daily Task</span>
                         <div className="flex flex-col items-center my-auto w-full">
                             {/* Standardized Icon Container to match others (h-8 w-8) */}
-                            <div className="h-8 w-8 mb-2 flex items-center justify-center bg-green-100 rounded-full text-green-600">
+                            <div className="h-8 w-8 mb-2 flex items-center justify-center bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
                                 <CheckCircle className="h-5 w-5" strokeWidth={3} />
                             </div>
-                            <p className="text-[10px] font-medium text-gray-900 leading-tight line-clamp-3 px-1">
+                            <p className="text-[10px] font-medium text-gray-900 dark:text-gray-300 leading-tight line-clamp-3 px-1">
                                 {currentTask ? currentTask.title : 'Check Supplies'}
                             </p>
                         </div>

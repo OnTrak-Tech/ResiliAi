@@ -46,18 +46,23 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    // HTML class handling is now done by ThemeProvider, so we can remove hardcoded 'dark' or keep strictly as default fallback
+    <html lang="en">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${inter.variable} ${oswald.variable} ${antonio.variable} font-sans antialiased bg-black text-white`}>
-        {children}
+      <body className={`${inter.variable} ${oswald.variable} ${antonio.variable} font-sans antialiased bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-50 transition-colors duration-300`}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
