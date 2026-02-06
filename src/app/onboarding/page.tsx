@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileStep } from '@/components/onboarding/ProfileStep'
 import { QuizStep } from '@/components/onboarding/QuizStep'
 import { ScoreReveal } from '@/components/onboarding/ScoreReveal'
+import { VerificationStep } from '@/components/onboarding/VerificationStep'
 import { useUserStore } from '@/store/userStore'
 
-type OnboardingStep = 'profile' | 'quiz' | 'score'
+type OnboardingStep = 'profile' | 'verification' | 'quiz' | 'score'
 
 export default function OnboardingPage() {
     const [currentStep, setCurrentStep] = useState<OnboardingStep>('profile')
@@ -24,6 +25,10 @@ export default function OnboardingPage() {
     }, [])
 
     const handleProfileComplete = () => {
+        setCurrentStep('verification')
+    }
+
+    const handleVerificationComplete = () => {
         setCurrentStep('quiz')
     }
 
@@ -50,6 +55,18 @@ export default function OnboardingPage() {
                             className="flex-1"
                         >
                             <ProfileStep onComplete={handleProfileComplete} />
+                        </motion.div>
+                    )}
+
+                    {currentStep === 'verification' && (
+                        <motion.div
+                            key="verification"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex-1 flex items-center justify-center p-4"
+                        >
+                            <VerificationStep onComplete={handleVerificationComplete} />
                         </motion.div>
                     )}
 
