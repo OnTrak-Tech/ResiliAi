@@ -16,6 +16,7 @@ export interface UserProfile {
     hasBackupPower: boolean | null
     resilienceScore: number
     onboardingComplete: boolean
+    theme: 'light' | 'dark' | 'system'
 }
 
 interface UserStore {
@@ -28,6 +29,7 @@ interface UserStore {
     setHasKids: (value: boolean) => void
     setHasElderly: (value: boolean) => void
     setHasBackupPower: (value: boolean) => void
+    setTheme: (theme: 'light' | 'dark' | 'system') => void
     calculateResilienceScore: () => void
     completeOnboarding: () => void
     resetProfile: () => void
@@ -46,6 +48,7 @@ const initialProfile: UserProfile = {
     hasBackupPower: null,
     resilienceScore: 0,
     onboardingComplete: false,
+    theme: 'system' // Default to system
 }
 
 export const useUserStore = create<UserStore>()(
@@ -76,6 +79,9 @@ export const useUserStore = create<UserStore>()(
 
             setHasBackupPower: (hasBackupPower) =>
                 set((state) => ({ profile: { ...state.profile, hasBackupPower } })),
+
+            setTheme: (theme) =>
+                set((state) => ({ profile: { ...state.profile, theme } })),
 
             calculateResilienceScore: () => {
                 const profile = get().profile
