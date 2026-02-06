@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProfileStep } from '@/components/onboarding/ProfileStep'
@@ -13,7 +13,15 @@ type OnboardingStep = 'profile' | 'quiz' | 'score'
 export default function OnboardingPage() {
     const [currentStep, setCurrentStep] = useState<OnboardingStep>('profile')
     const router = useRouter()
-    const { profile, completeOnboarding } = useUserStore()
+    const { profile, completeOnboarding, detectLocation } = useUserStore()
+
+    // Trigger detecting location on mount
+    useEffect(() => {
+        // Only try to detect if location is empty and on valid step
+        if (!profile.location && currentStep === 'profile') {
+            detectLocation()
+        }
+    }, [])
 
     const handleProfileComplete = () => {
         setCurrentStep('quiz')

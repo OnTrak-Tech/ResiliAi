@@ -90,9 +90,11 @@ export default function DashboardPage() {
                         <div className="flex flex-col items-center my-auto">
                             {weather ? (
                                 <>
-                                    {/* Use OWM Icon if available, else fallback */}
+                                    {/* Enforcing w-8 h-8 to match other cards */}
                                     {weather.icon ?
-                                        <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.condition} className="w-10 h-10 mb-1" />
+                                        <div className="h-8 w-8 mb-2 relative">
+                                            <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.condition} className="object-contain w-full h-full transform scale-125" />
+                                        </div>
                                         : getWeatherIcon(weather.temp, weather.condition)
                                     }
                                     <span className="text-xl font-bold text-gray-900">{Math.round(weather.temp)}°C</span>
@@ -128,14 +130,13 @@ export default function DashboardPage() {
                     <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl relative overflow-hidden">
                         <span className="text-[10px] font-bold uppercase mb-auto pt-1">Daily Task</span>
                         <div className="flex flex-col items-center my-auto w-full">
-                            <div className="bg-green-500 rounded-full p-1 mb-2">
-                                <CheckCircle className="text-white h-5 w-5" strokeWidth={3} />
+                            {/* Standardized Icon Container to match others (h-8 w-8) */}
+                            <div className="h-8 w-8 mb-2 flex items-center justify-center bg-green-100 rounded-full text-green-600">
+                                <CheckCircle className="h-5 w-5" strokeWidth={3} />
                             </div>
                             <p className="text-[10px] font-medium text-gray-900 leading-tight line-clamp-3 px-1">
                                 {currentTask ? currentTask.title : 'Check Supplies'}
                             </p>
-                            {/* Checkbox Placeholder for visual */}
-                            <div className="w-4 h-4 border-2 border-gray-300 rounded mt-2" />
                         </div>
                     </Card>
                 </div>
