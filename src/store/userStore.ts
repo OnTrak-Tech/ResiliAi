@@ -138,7 +138,7 @@ export const useUserStore = create<UserStore>()(
                     }
 
                     // Reverse Geocoding to get City Name
-                    const res = await fetch(`http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`)
+                    const res = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`)
                     const data = await res.json()
 
                     if (data && data.length > 0) {

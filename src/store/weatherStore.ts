@@ -50,7 +50,7 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
             }
 
             // 1. Geocoding (OpenWeatherMap)
-            const geoRes = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(location)}&limit=1&appid=${API_KEY}`)
+            const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(location)}&limit=1&appid=${API_KEY}`)
             const geoData = await geoRes.json()
 
             if (!geoData || geoData.length === 0) {
