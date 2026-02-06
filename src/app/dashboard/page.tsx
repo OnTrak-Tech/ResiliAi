@@ -23,7 +23,7 @@ const getWeatherIcon = (temp: number, condition: string) => {
 export default function DashboardPage() {
     const router = useRouter()
     const { profile } = useUserStore()
-    const { weather, fetchWeather } = useWeatherStore()
+    const { weather, alerts, fetchWeather } = useWeatherStore()
     const { tasks, generateDailyTasks } = useTaskStore()
 
     useEffect(() => {
@@ -40,10 +40,14 @@ export default function DashboardPage() {
         if (tasks.length === 0) {
             generateDailyTasks(profile, weather)
         }
-    }, [profile, weather, tasks.length, fetchWeather, generateDailyTasks])
+    }, [profile.location, tasks.length])
 
     // Get the first incomplete task for display
     const currentTask = tasks.find(t => !t.completed) || tasks[0]
+
+    // API-Driven Alert Status
+    const hasAlerts = alerts.length > 0
+    const topAlert = hasAlerts ? alerts[0] : null
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 pb-24 font-sans flex flex-col items-center">
@@ -84,20 +88,39 @@ export default function DashboardPage() {
                     <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl">
                         <span className="text-[10px] font-bold uppercase mb-auto pt-1">Weather</span>
                         <div className="flex flex-col items-center my-auto">
-                            {weather ? getWeatherIcon(weather.temp, weather.condition) : <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />}
-                            <span className="text-xl font-bold text-gray-900">{weather ? Math.round(weather.temp) : '--'}°C</span>
-                            <span className="text-[10px] text-gray-500 font-medium leading-tight mt-1 line-clamp-2">
-                                {weather ? weather.condition : 'Loading...'}
-                            </span>
+                            {weather ? (
+                                <>
+                                    {/* Use OWM Icon if available, else fallback */}
+                                    {weather.icon ?
+                                        <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.condition} className="w-10 h-10 mb-1" />
+                                        : getWeatherIcon(weather.temp, weather.condition)
+                                    }
+                                    <span className="text-xl font-bold text-gray-900">{Math.round(weather.temp)}°C</span>
+                                    <span className="text-[10px] text-gray-500 font-medium leading-tight mt-1 line-clamp-2 px-1">
+                                        {weather.condition}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sun className="text-gray-300 h-8 w-8 mb-2 animate-pulse" />
+                                    <span className="text-sm text-gray-400">Wait...</span>
+                                </>
+                            )}
                         </div>
                     </Card>
 
                     {/* Alerts Card */}
-                    <Card className="aspect-[4/5] p-3 flex flex-col items-center justify-center text-center bg-white border-none shadow-sm rounded-2xl">
-                        <span className="text-[10px] font-bold uppercase mb-auto pt-1">Alerts</span>
+                    <Card className={`aspect-[4/5] p-3 flex flex-col items-center justify-center text-center border-none shadow-sm rounded-2xl ${hasAlerts ? 'bg-red-50' : 'bg-white'}`}>
+                        <span className={`text-[10px] font-bold uppercase mb-auto pt-1 ${hasAlerts ? 'text-red-600' : 'text-gray-900'}`}>Alerts</span>
                         <div className="flex flex-col items-center my-auto">
-                            <Shield className="text-green-500 h-8 w-8 mb-2 fill-green-100" />
-                            <span className="text-sm font-medium text-gray-900">All Clear</span>
+                            {hasAlerts ? (
+                                <Shield className="text-red-500 h-8 w-8 mb-2 fill-red-100 animate-pulse" />
+                            ) : (
+                                <Shield className="text-green-500 h-8 w-8 mb-2 fill-green-100" />
+                            )}
+                            <span className={`text-sm font-medium ${hasAlerts ? 'text-red-700' : 'text-gray-900'} leading-tight line-clamp-2`}>
+                                {hasAlerts ? topAlert?.event : 'All Clear'}
+                            </span>
                         </div>
                     </Card>
 
