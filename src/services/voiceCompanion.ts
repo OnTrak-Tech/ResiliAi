@@ -81,7 +81,7 @@ export class VoiceCompanionService {
         }
 
         this.genAI = new GoogleGenerativeAI(apiKey)
-        const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+        const model = this.genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
         this.chat = model.startChat({
             history: [],
