@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/store/userStore'
 import { useWeatherStore } from '@/store/weatherStore'
 import { useTaskStore } from '@/store/taskStore'
+import { useGuardianWorker } from '@/hooks/useGuardianWorker'
 
 // --- Helper Functions ---
 const getWeatherIcon = (temp: number, condition: string) => {
@@ -25,6 +26,9 @@ export default function DashboardPage() {
     const { profile } = useUserStore()
     const { weather, alerts, fetchWeather } = useWeatherStore()
     const { tasks, generateDailyTasks } = useTaskStore()
+
+    // Register Guardian service worker for background alerts
+    useGuardianWorker()
 
     useEffect(() => {
         if (!profile.onboardingComplete) {

@@ -9,7 +9,7 @@ import { GoogleGenAI, Modality } from '@google/genai'
  * the client to connect directly to Gemini Live via WebSocket.
  */
 export async function POST() {
-    const apiKey = process.env.GOOGLE_AI_API_KEY
+    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY
 
     if (!apiKey) {
         return NextResponse.json(
