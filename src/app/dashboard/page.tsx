@@ -162,14 +162,14 @@ export default function DashboardPage() {
                 <Button
                     variant="default"
                     className="w-full h-20 bg-[#ef4444] hover:bg-[#dc2626] rounded-xl flex items-center justify-start px-6 shadow-lg shadow-red-500/20 relative group overflow-hidden"
-                    onClick={() => router.push('/voice-companion')}
+                    onClick={() => router.push('/guardian')}
                 >
                     <div className="mr-6 border-2 border-white/30 rounded-full p-2">
-                        <Phone className="w-8 h-8 text-white" />
+                        <Shield className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex flex-col items-start text-white">
-                        <span className="text-lg font-bold uppercase tracking-wide">SOS Guardian</span>
-                        <span className="text-xs text-red-100 font-medium tracking-wider">Guardian</span>
+                        <span className="text-lg font-bold uppercase tracking-wide">Guardian Live</span>
+                        <span className="text-xs text-red-100 font-medium tracking-wider">Voice Assistant</span>
                     </div>
                 </Button>
 
