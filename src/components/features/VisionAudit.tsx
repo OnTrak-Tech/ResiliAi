@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { analyzeImage, AnalysisResult, Hazard } from '@/services/geminiVision'
+import { FortificationPlan } from '@/components/features/FortificationPlan'
 
 // --- Severity Colors (Clean Enterprise) ---
 const SEVERITY_COLORS: Record<Hazard['severity'], string> = {
@@ -42,6 +43,7 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [result, setResult] = useState<AnalysisResult | null>(null)
     const [capturedImage, setCapturedImage] = useState<string | null>(null)
+    const [showFortificationPlan, setShowFortificationPlan] = useState(false)
 
     // --- Camera Setup ---
     useEffect(() => {
@@ -248,7 +250,7 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
                                     <Button onClick={handleRetry} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200">
                                         Rescan
                                     </Button>
-                                    <Button onClick={onClose} className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
+                                    <Button onClick={() => setShowFortificationPlan(true)} className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
                                         Action Plan
                                     </Button>
                                 </div>
@@ -265,6 +267,14 @@ export function VisionAudit({ onClose, onComplete }: VisionAuditProps) {
                 <NavIcon icon={User} label="Profile" onClick={() => router.push('/onboarding')} />
                 <NavIcon icon={Settings} label="Settings" onClick={() => router.push('/settings')} />
             </div>
+
+            {/* Fortification Plan Overlay */}
+            {showFortificationPlan && result && (
+                <FortificationPlan
+                    result={result}
+                    onBack={() => setShowFortificationPlan(false)}
+                />
+            )}
         </div>
     )
 }
