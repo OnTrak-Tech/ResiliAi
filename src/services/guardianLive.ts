@@ -96,26 +96,26 @@ export class GuardianLiveService {
                 callbacks: {
                     onopen: () => {
                         console.log('Guardian connected to Gemini Live')
+
+                        // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
+                        // This MUST happen synchronously before any event loop delay
+                        try {
+                            // Send a minimal silent audio frame (0.5 second of silence at 16kHz mono PCM)
+                            const silentAudio = new Uint8Array(8000).fill(128) // 8-bit PCM silence
+                            const base64Silent = btoa(String.fromCharCode.apply(null, Array.from(silentAudio)))
+
+                            this.session?.sendRealtimeInput({
+                                audio: {
+                                    data: base64Silent,
+                                    mimeType: 'audio/pcm;rate=16000',
+                                },
+                            })
+                            console.log('Guardian: sent keepalive audio')
+                        } catch (e) {
+                            console.error('Guardian: failed to send keepalive', e)
+                        }
+
                         callbacks.onConnected()
-
-                        // Send silent audio packet to satisfy audio modality requirement
-                        // This prevents immediate disconnection on text-only connections
-                        setTimeout(() => {
-                            if (this.session) {
-                                // Send a minimal silent audio frame (1 second of silence at 16kHz)
-                                const silentAudio = new Uint8Array(16000).fill(128) // 8-bit silence
-                                const base64Silent = btoa(String.fromCharCode(...silentAudio))
-
-                                this.session.sendRealtimeInput({
-                                    audio: {
-                                        data: base64Silent,
-                                        mimeType: 'audio/pcm;rate=16000',
-                                    },
-                                })
-
-                                console.log('Guardian: sent keepalive audio')
-                            }
-                        }, 100)
 
                         // Send initial greeting after audio to trigger response
                         setTimeout(() => {
@@ -128,7 +128,7 @@ export class GuardianLiveService {
                                     turnComplete: true,
                                 })
                             }
-                        }, 500)
+                        }, 200)
                     },
                     onmessage: (message: any) => {
                         this.handleMessage(message)
