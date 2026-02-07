@@ -87,8 +87,9 @@ export class GuardianLiveService {
             this.audioContext = new AudioContext({ sampleRate: 24000 })
 
             // Connect to Gemini Live
+            // Using gemini-3-pro-preview for hackathon (more stable than flash)
             this.session = await this.ai.live.connect({
-                model: 'gemini-3-flash-preview',
+                model: 'gemini-3-pro-preview',
                 config: {
                     responseModalities: [Modality.AUDIO, Modality.TEXT],
                     systemInstruction: createSystemPrompt(context),
@@ -96,28 +97,10 @@ export class GuardianLiveService {
                 callbacks: {
                     onopen: () => {
                         console.log('Guardian connected to Gemini Live')
-
-                        // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
-                        // This MUST happen synchronously before any event loop delay
-                        try {
-                            // Send a minimal silent audio frame (0.5 second of silence at 16kHz mono PCM)
-                            const silentAudio = new Uint8Array(8000).fill(128) // 8-bit PCM silence
-                            const base64Silent = btoa(String.fromCharCode.apply(null, Array.from(silentAudio)))
-
-                            this.session?.sendRealtimeInput({
-                                audio: {
-                                    data: base64Silent,
-                                    mimeType: 'audio/pcm;rate=16000',
-                                },
-                            })
-                            console.log('Guardian: sent keepalive audio')
-                        } catch (e) {
-                            console.error('Guardian: failed to send keepalive', e)
-                        }
-
                         callbacks.onConnected()
 
-                        // Send initial greeting after audio to trigger response
+                        // Send initial greeting to trigger Guardian's introduction
+                        // This keeps the session alive and starts the conversation
                         setTimeout(() => {
                             if (this.session) {
                                 this.session.sendClientContent({
@@ -128,7 +111,7 @@ export class GuardianLiveService {
                                     turnComplete: true,
                                 })
                             }
-                        }, 200)
+                        }, 500)
                     },
                     onmessage: (message: any) => {
                         this.handleMessage(message)

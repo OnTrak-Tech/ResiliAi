@@ -29,7 +29,7 @@ export async function POST() {
                 uses: 1, // Single use token
                 expireTime: expireTime,
                 liveConnectConstraints: {
-                    model: 'gemini-3-flash-preview',
+                    model: 'gemini-3-pro-preview',
                     config: {
                         sessionResumption: {},
                         temperature: 0.7,
@@ -45,7 +45,7 @@ export async function POST() {
         return NextResponse.json({
             token: token.name,
             expiresAt: expireTime,
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3-pro-preview',
         })
     } catch (error: any) {
         console.error('Failed to generate ephemeral token:', error)
