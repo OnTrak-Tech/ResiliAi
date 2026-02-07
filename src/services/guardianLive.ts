@@ -98,8 +98,26 @@ export class GuardianLiveService {
                         console.log('Guardian connected to Gemini Live')
                         callbacks.onConnected()
 
-                        // Send initial greeting to trigger Guardian's introduction
-                        // This keeps the session alive and starts the conversation
+                        // Send silent audio packet to satisfy audio modality requirement
+                        // This prevents immediate disconnection on text-only connections
+                        setTimeout(() => {
+                            if (this.session) {
+                                // Send a minimal silent audio frame (1 second of silence at 16kHz)
+                                const silentAudio = new Uint8Array(16000).fill(128) // 8-bit silence
+                                const base64Silent = btoa(String.fromCharCode(...silentAudio))
+
+                                this.session.sendRealtimeInput({
+                                    audio: {
+                                        data: base64Silent,
+                                        mimeType: 'audio/pcm;rate=16000',
+                                    },
+                                })
+
+                                console.log('Guardian: sent keepalive audio')
+                            }
+                        }, 100)
+
+                        // Send initial greeting after audio to trigger response
                         setTimeout(() => {
                             if (this.session) {
                                 this.session.sendClientContent({
