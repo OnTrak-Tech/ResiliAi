@@ -97,6 +97,20 @@ export class GuardianLiveService {
                     onopen: () => {
                         console.log('Guardian connected to Gemini Live')
                         callbacks.onConnected()
+
+                        // Send initial greeting to trigger Guardian's introduction
+                        // This keeps the session alive and starts the conversation
+                        setTimeout(() => {
+                            if (this.session) {
+                                this.session.sendClientContent({
+                                    turns: [{
+                                        role: 'user',
+                                        parts: [{ text: 'Hello Guardian, I need your help.' }]
+                                    }],
+                                    turnComplete: true,
+                                })
+                            }
+                        }, 500)
                     },
                     onmessage: (message: any) => {
                         this.handleMessage(message)
