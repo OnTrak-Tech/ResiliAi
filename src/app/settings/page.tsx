@@ -161,7 +161,7 @@ export default function SettingsPage() {
                     >
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Sign Out?</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                            Are you sure you want to sign out? Your local data will be cleared.
+                            Are you sure you want to sign out? Your data will be cleared.
                         </p>
                         <div className="flex gap-3">
                             <Button
