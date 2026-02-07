@@ -23,8 +23,18 @@ import { useUserStore } from '@/store/userStore'
 export default function SettingsPage() {
     const router = useRouter()
     // Connect to User Store
-    const { profile, setTheme } = useUserStore()
+    const { profile, setTheme, resetProfile } = useUserStore()
     const theme = profile.theme || 'system'
+    const [showSignOutModal, setShowSignOutModal] = useState(false)
+
+    const handleSignOut = () => {
+        // Clear the persisted storage
+        localStorage.removeItem('resiliai-user-storage')
+        // Reset profile state
+        resetProfile()
+        // Redirect to landing
+        router.push('/')
+    }
 
     const menuItems = {
         account: [
@@ -110,6 +120,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col items-center gap-6 pt-4">
                     <Button
                         variant="outline"
+                        onClick={() => setShowSignOutModal(true)}
                         className="w-full h-12 rounded-xl bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 hover:text-red-700 font-semibold transition-colors"
                     >
                         <LogOut className="w-4 h-4 mr-2" />
@@ -132,6 +143,44 @@ export default function SettingsPage() {
                 <NavIcon icon={User} label="Profile" />
                 <NavIcon icon={SettingsIcon} label="Settings" active />
             </div>
+
+            {/* Sign Out Confirmation Modal */}
+            {showSignOutModal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-6"
+                    onClick={() => setShowSignOutModal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-xl"
+                    >
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Sign Out?</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            Are you sure you want to sign out? Your local data will be cleared.
+                        </p>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowSignOutModal(false)}
+                                className="flex-1 h-11 rounded-xl border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleSignOut}
+                                className="flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Sign Out
+                            </Button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
 
         </div>
     )
