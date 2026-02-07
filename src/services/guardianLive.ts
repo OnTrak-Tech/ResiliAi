@@ -77,8 +77,11 @@ export class GuardianLiveService {
         this.callbacks = callbacks
 
         try {
-            // Initialize with ephemeral token
-            this.ai = new GoogleGenAI({ apiKey: token })
+            // Initialize with ephemeral token - MUST use v1alpha for ephemeral tokens
+            this.ai = new GoogleGenAI({
+                apiKey: token,
+                httpOptions: { apiVersion: 'v1alpha' }
+            })
 
             // Create audio context for playback
             this.audioContext = new AudioContext({ sampleRate: 24000 })
