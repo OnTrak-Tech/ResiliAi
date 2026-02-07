@@ -41,7 +41,7 @@ ResiliAi leverages the absolute bleeding edge of Google's AI:
 
 ---
 
-##  Technical Stack (Judge's Corner)
+##  Technical Stack 
 
 Built for speed, reliability, and the modern web.
 *   **Frontend:** Next.js 14 (App Router) + TypeScript
@@ -59,6 +59,25 @@ Deep dive into our architecture and design:
 *    **[Product Concept](./Documentation/Product_Concept.md)** - The full vision, "Blue Sky / Grey Sky" lifecycle, and demo flow.
 *    **[Technical Architecture](./Documentation/Technical_Architecture.md)** - AI integration matrix, database schema, and security.
 *    **[User Flow & Wireframes](./Documentation/User_Flow.md)** - Step-by-step user journey from onboarding to crisis response.
+
+---
+
+##  Best Experience: Install as PWA
+
+ResiliAi is designed as a **Progressive Web App (PWA)** for instant access during emergencies.
+
+**To install:**
+1. Open the app in Chrome (desktop/mobile) or Safari (iOS)
+2. Tap the browser menu (⋮ or share icon)
+3. Select **"Add to Home Screen"** or **"Install App"**
+
+**PWA benefits:**
+-  Works offline (cached resources)
+-  Push notifications for real-time alerts  
+-  One-tap access from home screen
+-  Full-screen, app-like experience
+
+> **Note for Judges:** The app works in-browser for testing, but installing as a PWA unlocks the full emergency-ready experience including background alert monitoring.
 
 ---
 

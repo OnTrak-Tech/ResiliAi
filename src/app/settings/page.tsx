@@ -23,7 +23,7 @@ import { useUserStore } from '@/store/userStore'
 export default function SettingsPage() {
     const router = useRouter()
     // Connect to User Store
-    const { profile, setTheme, resetProfile } = useUserStore()
+    const { profile, setTheme, setGuardianAutoSpeak, resetProfile } = useUserStore()
     const theme = profile.theme || 'system'
     const [showSignOutModal, setShowSignOutModal] = useState(false)
 
@@ -98,6 +98,32 @@ export default function SettingsPage() {
                                 isLast={index === menuItems.account.length - 1}
                             />
                         ))}
+                    </div>
+                </section>
+
+                {/* GUARDIAN Section */}
+                <section>
+                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Guardian Voice</h2>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors">
+                        <div className="flex items-center justify-between px-4 py-4">
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">Auto-Speak on Critical Alerts</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Guardian will speak automatically during emergencies</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setGuardianAutoSpeak(!profile.guardianAutoSpeak)}
+                                className={`w-12 h-7 rounded-full transition-colors ${profile.guardianAutoSpeak
+                                    ? 'bg-blue-600'
+                                    : 'bg-gray-300 dark:bg-slate-600'
+                                    }`}
+                            >
+                                <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${profile.guardianAutoSpeak ? 'translate-x-6' : 'translate-x-1'
+                                    }`} />
+                            </button>
+                        </div>
                     </div>
                 </section>
 

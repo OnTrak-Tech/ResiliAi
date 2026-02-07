@@ -20,6 +20,13 @@ export interface UserProfile {
     email: string
     emailVerified: boolean
     verificationHash?: string
+    guardianAutoSpeak: boolean
+    quizAnswers?: {
+        householdSize?: number
+        hasElderly?: boolean
+        hasPets?: boolean
+        mobilityNotes?: string
+    }
 }
 
 interface UserStore {
@@ -35,6 +42,7 @@ interface UserStore {
     setTheme: (theme: 'light' | 'dark' | 'system') => void
     setEmail: (email: string) => void
     setVerificationHash: (hash: string) => void
+    setGuardianAutoSpeak: (value: boolean) => void
     calculateResilienceScore: () => void
     completeOnboarding: () => void
     resetProfile: () => void
@@ -56,7 +64,9 @@ const initialProfile: UserProfile = {
     theme: 'system', // Default to system
     email: '',
     emailVerified: false,
-    verificationHash: undefined
+    verificationHash: undefined,
+    guardianAutoSpeak: false,
+    quizAnswers: undefined,
 }
 
 export const useUserStore = create<UserStore>()(
@@ -96,6 +106,9 @@ export const useUserStore = create<UserStore>()(
 
             setVerificationHash: (hash) =>
                 set((state) => ({ profile: { ...state.profile, verificationHash: hash } })),
+
+            setGuardianAutoSpeak: (guardianAutoSpeak) =>
+                set((state) => ({ profile: { ...state.profile, guardianAutoSpeak } })),
 
             calculateResilienceScore: () => {
                 const profile = get().profile
