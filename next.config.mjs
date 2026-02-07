@@ -6,6 +6,8 @@ const withPWA = withPWAInit({
     disable: process.env.NODE_ENV === 'development',
     register: true,
     skipWaiting: true,
+    buildExcludes: [/worker-guardian.js$/],
+    publicExcludes: ['!api/**/*'], // Don't cache API routes
 })
 
 /** @type {import('next').NextConfig} */
