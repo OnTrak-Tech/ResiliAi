@@ -72,8 +72,14 @@ export class GuardianLiveService {
     private audioQueue: ArrayBuffer[] = []
     private isPlaying = false
     private callbacks: GuardianCallbacks | null = null
+    private isConnecting = false
 
     async connect(token: string, context: GuardianContext, callbacks: GuardianCallbacks): Promise<void> {
+        if (this.isConnecting) {
+            console.log('Guardian: Connection already in progress, ignoring')
+            return
+        }
+        this.isConnecting = true
         this.callbacks = callbacks
 
         try {
@@ -97,13 +103,26 @@ export class GuardianLiveService {
                 callbacks: {
                     onopen: () => {
                         console.log('Guardian connected to Gemini Live')
+                        this.isConnecting = false
 
                         // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
-                        // This MUST happen synchronously before any event loop delay
+                        // MUST be 16-bit Linear PCM (Int16Array) at 16kHz
                         try {
-                            // Send a minimal silent audio frame (0.5 second of silence at 16kHz mono PCM)
-                            const silentAudio = new Uint8Array(8000).fill(128) // 8-bit PCM silence
-                            const base64Silent = btoa(String.fromCharCode.apply(null, Array.from(silentAudio)))
+                            // 0.5 second of silence at 16kHz
+                            // 16kHz * 0.5s = 8000 samples
+                            // Int16Array takes 2 bytes per element, so header is handled by mimetype
+                            const pcm16 = new Int16Array(8000) // Default initialized to 0s (silence)
+
+                            // Convert to bytes for Base64 (little-endian)
+                            const buffer = new Uint8Array(pcm16.buffer)
+
+                            // Efficient binary string construction
+                            let binary = ''
+                            const len = buffer.byteLength
+                            for (let i = 0; i < len; i++) {
+                                binary += String.fromCharCode(buffer[i])
+                            }
+                            const base64Silent = btoa(binary)
 
                             this.session?.sendRealtimeInput({
                                 audio: {
@@ -111,7 +130,7 @@ export class GuardianLiveService {
                                     mimeType: 'audio/pcm;rate=16000',
                                 },
                             })
-                            console.log('Guardian: sent keepalive audio')
+                            console.log('Guardian: sent valid 16-bit PCM keepalive')
                         } catch (e) {
                             console.error('Guardian: failed to send keepalive', e)
                         }
@@ -137,16 +156,19 @@ export class GuardianLiveService {
                     },
                     onerror: (error: any) => {
                         console.error('Guardian error:', error)
+                        this.isConnecting = false
                         callbacks.onError(error?.message || 'Connection error')
                     },
                     onclose: () => {
                         console.log('Guardian disconnected')
+                        this.isConnecting = false
                         callbacks.onDisconnected()
                     },
                 },
             })
         } catch (error: any) {
             console.error('Failed to connect Guardian:', error)
+            this.isConnecting = false
             callbacks.onError(error?.message || 'Failed to connect')
             throw error
         }
