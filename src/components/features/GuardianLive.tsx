@@ -49,12 +49,10 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
     useEffect(() => {
         async function connect() {
             try {
-                // Fetch ephemeral token
-                const tokenResponse = await fetch('/api/live/token', { method: 'POST' })
-                if (!tokenResponse.ok) {
-                    throw new Error('Failed to get session token')
+                const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY
+                if (!apiKey) {
+                    throw new Error('API key not configured')
                 }
-                const { token } = await tokenResponse.json()
 
                 // Build context from user profile and alerts
                 const context: GuardianContext = {
@@ -68,7 +66,7 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
                 }
 
                 // Connect to Gemini Live
-                await guardianRef.current.connect(token, context, {
+                await guardianRef.current.connect(apiKey, context, {
                     onConnected: () => {
                         setStatus('connected')
                         setTranscript(['Guardian: I\'m here with you. What\'s happening?'])
