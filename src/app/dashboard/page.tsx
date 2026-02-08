@@ -2,6 +2,8 @@
 
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -56,10 +58,23 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 pb-24 font-sans flex flex-col items-center transition-colors duration-300">
 
-            {/* Header: Centered Logo Text */}
-            <header className="w-full pt-8 pb-4 flex justify-center items-center relative bg-gray-50 dark:bg-slate-950 transition-colors">
-                <h1 className="text-3xl font-bold text-[#2563eb] dark:text-[#3b82f6] tracking-tight">ResiliAI</h1>
-            </header>
+            {/* Logo Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="w-full pt-8 pb-4 flex flex-col items-center relative bg-gray-50 dark:bg-slate-950 transition-colors"
+            >
+                <div className="relative w-64 h-24 mb-2">
+                    <Image
+                        src="/icons/ResiliAi.png"
+                        alt="ResiliAi Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
+                </div>
+            </motion.div>
 
             <main className="w-full max-w-md px-6 space-y-4">
 

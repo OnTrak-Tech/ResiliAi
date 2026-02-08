@@ -58,7 +58,6 @@ export function ProfileStep({ onComplete }: { onComplete: () => void }) {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-8 mt-4"
             >
-                <span className="text-gray-500 text-sm font-medium block mb-2 text-center">Step 1</span>
 
                 {/* Progress Bar */}
                 <div className="h-2 w-full bg-blue-100 rounded-full mb-8 relative overflow-hidden">
