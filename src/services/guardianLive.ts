@@ -104,42 +104,11 @@ export class GuardianLiveService {
                     onopen: () => {
                         console.log('Guardian connected to Gemini Live')
                         this.isConnecting = false
-
-                        // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
-                        // MUST be 16-bit Linear PCM (Int16Array) at 16kHz
-                        try {
-                            // 0.5 second of silence at 16kHz
-                            // 16kHz * 0.5s = 8000 samples
-                            // Int16Array takes 2 bytes per element, so header is handled by mimetype
-                            const pcm16 = new Int16Array(8000) // Default initialized to 0s (silence)
-
-                            // Convert to bytes for Base64 (little-endian)
-                            const buffer = new Uint8Array(pcm16.buffer)
-
-                            // Efficient binary string construction
-                            let binary = ''
-                            const len = buffer.byteLength
-                            for (let i = 0; i < len; i++) {
-                                binary += String.fromCharCode(buffer[i])
-                            }
-                            const base64Silent = btoa(binary)
-
-                            this.session?.sendRealtimeInput({
-                                audio: {
-                                    data: base64Silent,
-                                    mimeType: 'audio/pcm;rate=16000',
-                                },
-                            })
-                            console.log('Guardian: sent valid 16-bit PCM keepalive')
-                        } catch (e) {
-                            console.error('Guardian: failed to send keepalive', e)
-                        }
-
                         callbacks.onConnected()
 
-                        // Send initial greeting to trigger Guardian's introduction
-                        // This keeps the session alive and starts the conversation
-                        setTimeout(() => {
+                        // Send initial greeting IMMEDIATELY to establish session state
+                        // This serves as the keep-alive without risking audio format issues
+                        try {
                             if (this.session) {
                                 this.session.sendClientContent({
                                     turns: [{
@@ -148,8 +117,11 @@ export class GuardianLiveService {
                                     }],
                                     turnComplete: true,
                                 })
+                                console.log('Guardian: sent initial greeting')
                             }
-                        }, 500)
+                        } catch (e) {
+                            console.error('Guardian: failed to send greeting', e)
+                        }
                     },
                     onmessage: (message: any) => {
                         this.handleMessage(message)
