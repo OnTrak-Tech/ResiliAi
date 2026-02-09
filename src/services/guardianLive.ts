@@ -100,7 +100,7 @@ export class GuardianLiveService {
 
             // Connect to Gemini Live
             this.session = await this.ai.live.connect({
-                model: 'gemini-3-pro-preview',
+                model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                 config: {
                     responseModalities: [Modality.AUDIO, Modality.TEXT],
                     systemInstruction: createSystemPrompt(context),
