@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow, Zap, AlertTriangle, Waves } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/store/userStore'
@@ -31,6 +31,16 @@ export default function DashboardPage() {
 
     // Register Guardian service worker for background alerts
     useGuardianWorker()
+
+    // Simulation Mode State
+    const [showSimModal, setShowSimModal] = useState(false)
+    const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
+
+    const SIMULATION_SCENARIOS = [
+        { id: 'tornado', name: 'Tornado Warning', icon: Zap, color: 'bg-red-500', description: 'Tornado approaching your area' },
+        { id: 'earthquake', name: 'Earthquake', icon: AlertTriangle, color: 'bg-orange-500', description: 'Strong earthquake activity detected' },
+        { id: 'flood', name: 'Flash Flood', icon: Waves, color: 'bg-blue-500', description: 'Flash flood warning in effect' },
+    ]
 
     useEffect(() => {
         if (!profile.onboardingComplete) {
@@ -207,6 +217,17 @@ export default function DashboardPage() {
                     </div>
                 </Button>
 
+                {/* Practice Mode */}
+                <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center gap-3"
+                    onClick={() => setShowSimModal(true)}
+                >
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">Practice Mode</span>
+                    <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">Simulation</span>
+                </Button>
+
             </main>
 
             {/* Bottom Navigation Bar */}
@@ -216,6 +237,83 @@ export default function DashboardPage() {
                 <NavIcon icon={User} label="Profile" onClick={() => router.push('/onboarding')} />
                 <NavIcon icon={Settings} label="Settings" onClick={() => router.push('/settings')} />
             </div>
+
+            {/* Simulation Mode Modal */}
+            <AnimatePresence>
+                {showSimModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-6"
+                        onClick={() => setShowSimModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-xl"
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                                    <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Practice Mode</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Train with simulated emergencies</p>
+                                </div>
+                            </div>
+
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                Select a scenario to practice with Guardian. No real alerts will be triggered.
+                            </p>
+
+                            <div className="space-y-2 mb-6">
+                                {SIMULATION_SCENARIOS.map((scenario) => (
+                                    <button
+                                        key={scenario.id}
+                                        onClick={() => setSelectedScenario(scenario.id)}
+                                        className={`w-full p-3 rounded-xl border-2 flex items-center gap-3 transition-all ${selectedScenario === scenario.id
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+                                            }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-lg ${scenario.color} flex items-center justify-center`}>
+                                            <scenario.icon className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="font-medium text-gray-900 dark:text-white text-sm">{scenario.name}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{scenario.description}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSimModal(false)}
+                                    className="flex-1 h-11 rounded-xl"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (selectedScenario) {
+                                            router.push(`/guardian?simulation=${selectedScenario}`)
+                                        }
+                                    }}
+                                    disabled={!selectedScenario}
+                                    className="flex-1 h-11 rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50"
+                                >
+                                    Start Practice
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

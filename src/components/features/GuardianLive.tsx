@@ -21,12 +21,14 @@ import { useWeatherStore } from '@/store/weatherStore'
 
 interface GuardianLiveProps {
     onClose: () => void
+    simulationAlert?: { event: string; description: string } | null
+    isSimulation?: boolean
 }
 
 const MAX_RECONNECT_ATTEMPTS = 3
 const BASE_RECONNECT_DELAY = 2000 // 2 seconds
 
-export function GuardianLive({ onClose }: GuardianLiveProps) {
+export function GuardianLive({ onClose, simulationAlert, isSimulation = false }: GuardianLiveProps) {
     const router = useRouter()
     const { profile } = useUserStore()
     const { alerts } = useWeatherStore()
@@ -52,9 +54,14 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
 
     // --- Build context once (don't change during session) ---
     useEffect(() => {
+        // Use simulation alert if in simulation mode, otherwise use real alerts
+        const activeAlerts = isSimulation && simulationAlert
+            ? [`[SIMULATION] ${simulationAlert.event}: ${simulationAlert.description}`]
+            : alerts?.map(a => `${a.event}: ${a.description}`) || []
+
         contextRef.current = {
             location: profile.location || 'Unknown',
-            activeAlerts: alerts?.map(a => `${a.event}: ${a.description}`) || [],
+            activeAlerts,
             householdSize: profile.quizAnswers?.householdSize,
             hasElderly: profile.quizAnswers?.hasElderly,
             hasPets: profile.quizAnswers?.hasPets,
@@ -212,8 +219,13 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
                     <X className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <Shield className={`h-5 w-5 ${isSimulation ? 'text-yellow-500' : 'text-blue-600 dark:text-blue-400'}`} />
                     <span className="font-semibold text-lg text-gray-900 dark:text-white">Guardian</span>
+                    {isSimulation && (
+                        <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-medium">
+                            Practice
+                        </span>
+                    )}
                 </div>
                 <div className="w-10" /> {/* Spacer */}
             </div>
