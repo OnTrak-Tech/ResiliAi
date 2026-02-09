@@ -17,6 +17,7 @@ export interface UserProfile {
     hasBackupPower: boolean | null
     resilienceScore: number
     onboardingComplete: boolean
+    verificationHash?: string
 }
 
 interface UserStore {
@@ -32,6 +33,7 @@ interface UserStore {
     setHasBackupPower: (value: boolean) => void
     calculateResilienceScore: () => void
     completeOnboarding: () => void
+    setVerificationHash: (hash: string) => void
     resetProfile: () => void
 }
 
@@ -110,6 +112,9 @@ export const useUserStore = create<UserStore>()(
                 get().calculateResilienceScore()
                 set((state) => ({ profile: { ...state.profile, onboardingComplete: true } }))
             },
+
+            setVerificationHash: (hash) =>
+                set((state) => ({ profile: { ...state.profile, verificationHash: hash } })),
 
             resetProfile: () => set({ profile: initialProfile }),
         }),
