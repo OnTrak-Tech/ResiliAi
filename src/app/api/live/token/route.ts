@@ -31,13 +31,8 @@ export async function POST() {
                 liveConnectConstraints: {
                     model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                     config: {
-                        sessionResumption: {},
-                        temperature: 0.7,
                         responseModalities: [Modality.AUDIO, Modality.TEXT],
                     },
-                },
-                httpOptions: {
-                    apiVersion: 'v1alpha',
                 },
             },
         })
