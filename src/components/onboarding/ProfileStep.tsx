@@ -14,12 +14,16 @@ export function ProfileStep({ onComplete }: { onComplete: () => void }) {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        // Allows +, spaces, dashes, parentheses and numbers. Min 10 digits/chars.
+        const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/
+
         setIsValid(
             profile.name.length > 0 &&
             profile.location.length > 0 &&
-            profile.email.length > 0 &&
+            emailRegex.test(profile.email) &&
             profile.emergencyContact.name.length > 0 &&
-            profile.emergencyContact.phone.length > 0
+            phoneRegex.test(profile.emergencyContact.phone)
         )
     }, [profile])
 
