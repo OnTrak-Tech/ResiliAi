@@ -19,20 +19,20 @@ Panic freezes the brain. ResiliAi unfreezes it.
 *   **Calm Guidance:** A reasoning voice assistant (Gemini Live) talks you through smoke, floods, or blackouts in real-time.
 *   **Emotional Regulation:** The AI adapts its tone to de-escalate panic while keeping you moving.
 
-### 🎮 "Drill Sergeant" Simulations (Practice Mode)
+###  "Drill Sergeant" Simulations (Practice Mode)
 Don't just read about disasters—live them (virtually).
 *   **Interactive Scenarios:** "It's 2 AM. Flood sirens are blaring. Battery is 12%. What do you do?"
 *   **Personalized:** Utilizing your *actual* home inventory scanned by Sentinel.
 *   **Gamified:** Earn Resilience Points for making the right active decisions.
 
-#### 🔥 How Practice Mode Works
+####  How Practice Mode Works
 From the dashboard, tap **"Practice Mode"** to launch a simulated emergency:
 
 | Scenario | What Guardian Receives |
 |----------|----------------------|
-| 🌪️ Tornado Warning | `[SIMULATION] Tornado approaching your area...` |
-| ⚠️ Earthquake | `[SIMULATION] Strong earthquake activity detected...` |
-| 🌊 Flash Flood | `[SIMULATION] Flash flood warning in effect...` |
+|  Tornado Warning | `[SIMULATION] Tornado approaching your area...` |
+|  Earthquake | `[SIMULATION] Strong earthquake activity detected...` |
+|  Flash Flood | `[SIMULATION] Flash flood warning in effect...` |
 
 *   **Same AI, Safe Context:** Guardian provides real guidance based on the simulated scenario—no actual alerts triggered.
 *   **Visual Indicator:** A yellow "Practice" badge appears so users know they're training.
@@ -51,7 +51,7 @@ When cell towers fail, your community shouldn't.
 
 ResiliAi leverages the absolute bleeding edge of Google's AI:
 *   **Gemini Vision:** For real-time object detection and hazard analysis.
-*   **Gemini 2.0 Flash/Live:** For low-latency conversational audio streaming.
+*   **Gemini Live:** For low-latency conversational audio streaming.
 *   **Long-Context Window:** To hold your entire "Home Profile" in memory for hyper-personalized advice.
 
 ---
@@ -96,7 +96,7 @@ ResiliAi is designed as a **Progressive Web App (PWA)** for instant access durin
 
 ---
 
-##  Future Roadmap & Premium Features
+##  Future Roadmap
 
 ###  Verified Trust Circles
 In a disaster, trust is the most critical currency. Future versions will implement:
@@ -108,6 +108,12 @@ In a disaster, trust is the most critical currency. Future versions will impleme
 *   **Offline Maps Download:** Cache entire regions for navigation without internet.
 *   **Family Satellite Sync:** Integration with satellite-enabled devices (like Pixel 9/iPhone 15) for off-grid family tracking.
 *   **Priority AI Processing:** Faster response times during peak network congestion.
+
+###  Ecosystem & Accessibility
+*   **Community Mesh Networking:** When cell towers fail, use device-to-device communication (WebRTC, Bluetooth) to share safety status with neighbors.
+*   **Integration with Smart Home:** Auto-detect hazards via connected cameras, control smart locks/lights during evacuations.
+*   **Municipal Partnerships:** Provide anonymized, aggregated preparedness data to cities for disaster planning.
+*   **Accessibility First:** Screen reader support, multi-language guidance, ASL video guides.
 
 ---
 
