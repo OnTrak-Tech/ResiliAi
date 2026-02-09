@@ -40,7 +40,7 @@ From the dashboard, tap **"Practice Mode"** to launch a simulated emergency:
 
 > **For Judges:** Practice Mode demonstrates the app's training capability. In real use, Guardian receives actual weather alerts from the user's location, enabling context-aware emergency guidance.
 
-### 🔗 "Lifeline" Community Mesh
+###  "Lifeline" Community Mesh
 When cell towers fail, your community shouldn't.
 *   **Offline-First:** Critical data is stored locally on your device.
 *   **Supply Matching:** "Neighbor Sarah has extra water." (Mesh Protocol Mockup).

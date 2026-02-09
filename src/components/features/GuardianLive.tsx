@@ -54,6 +54,11 @@ export function GuardianLive({ onClose, simulationAlert, isSimulation = false }:
 
     // --- Build context once (don't change during session) ---
     useEffect(() => {
+        // Proactively ask for microphone permission immediately
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(() => console.log('Microphone permission granted'))
+            .catch(err => console.error('Microphone permission denied:', err))
+
         // Use simulation alert if in simulation mode, otherwise use real alerts
         const activeAlerts = isSimulation && simulationAlert
             ? [`[SIMULATION] ${simulationAlert.event}: ${simulationAlert.description}`]
@@ -367,7 +372,7 @@ export function GuardianLive({ onClose, simulationAlert, isSimulation = false }:
             <div className="bg-white dark:bg-black/50 border-t border-gray-200 dark:border-gray-800 py-4 px-8 flex justify-between items-center transition-colors">
                 <NavIcon icon={Home} label="Home" onClick={() => { handleClose(); router.push('/dashboard') }} />
                 <NavIcon icon={Scan} label="Scan" onClick={() => { handleClose(); router.push('/vision-audit') }} />
-                <NavIcon icon={Shield} label="Guardian" active />
+                <NavIcon icon={Mic} label="Guardian" active />
                 <NavIcon icon={Settings} label="Settings" onClick={() => { handleClose(); router.push('/settings') }} />
             </div>
         </div>
