@@ -71,18 +71,18 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
             setStatus('connecting')
             setError(null)
 
-            // Fetch ephemeral token from server (Priority 2)
-            const tokenRes = await fetch('/api/live/token', { method: 'POST' })
+            // ⚠️ SECURITY: Using direct API key for hackathon stability
+            // In production, revert to ephemeral tokens once Google fixes the 404 issue
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY
 
-            if (!tokenRes.ok) {
-                const errorData = await tokenRes.json()
-                throw new Error(errorData.error || 'Failed to get session token')
+            if (!apiKey) {
+                throw new Error('API Key not configured')
             }
 
-            const { token } = await tokenRes.json()
+            if (!isMountedRef.current) return
 
-            // Connect to Gemini Live with ephemeral token
-            await guardianRef.current.connect(token, contextRef.current, {
+            // Connect using direct API key
+            await guardianRef.current.connect(apiKey, contextRef.current, {
                 onConnected: () => {
                     setStatus('connected')
                     setReconnectAttempt(0) // Reset on successful connection
