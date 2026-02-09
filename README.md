@@ -96,6 +96,21 @@ ResiliAi is designed as a **Progressive Web App (PWA)** for instant access durin
 
 ---
 
+##  Future Roadmap & Premium Features
+
+###  Verified Trust Circles
+In a disaster, trust is the most critical currency. Future versions will implement:
+*   **Identity Verification:** Users must verify their ID to participate in the Mesh Network.
+*   **Circle of Trust:** Unverified users can see *where* resources are but cannot contact providers directly.
+*   **Preventing Fraud:** Ensures that "Sarah with extra water" is a real, verified neighbor, not a bad actor.
+
+###  ResiliAi Premium Tier
+*   **Offline Maps Download:** Cache entire regions for navigation without internet.
+*   **Family Satellite Sync:** Integration with satellite-enabled devices (like Pixel 9/iPhone 15) for off-grid family tracking.
+*   **Priority AI Processing:** Faster response times during peak network congestion.
+
+---
+
 ## Getting Started
 
 ```bash
