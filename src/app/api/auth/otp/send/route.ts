@@ -64,7 +64,7 @@ export async function POST(req: Request) {
             const resend = new Resend(API_KEY)
 
             await resend.emails.send({
-                from: 'ResiliAi <verify.resiliai.site>',
+                from: 'ResiliAi <onboarding@verify.resiliai.site>',
                 to: email,
                 subject: 'Your ResiliAi Verification Code',
                 html: `
