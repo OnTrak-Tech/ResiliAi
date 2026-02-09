@@ -27,6 +27,14 @@ export interface UserProfile {
         hasPets?: boolean
         mobilityNotes?: string
     }
+    notificationPreferences?: {
+        pushEnabled: boolean
+        emailEnabled: boolean
+        alertSeverity: 'extreme' | 'severe' | 'moderate' | 'all'
+        quietHoursEnabled: boolean
+        quietHoursStart: string
+        quietHoursEnd: string
+    }
 }
 
 interface UserStore {
@@ -43,6 +51,7 @@ interface UserStore {
     setEmail: (email: string) => void
     setVerificationHash: (hash: string) => void
     setGuardianAutoSpeak: (value: boolean) => void
+    setNotificationPreferences: (prefs: UserProfile['notificationPreferences']) => void
     calculateResilienceScore: () => void
     completeOnboarding: () => void
     resetProfile: () => void
@@ -67,6 +76,14 @@ const initialProfile: UserProfile = {
     verificationHash: undefined,
     guardianAutoSpeak: false,
     quizAnswers: undefined,
+    notificationPreferences: {
+        pushEnabled: true,
+        emailEnabled: false,
+        alertSeverity: 'moderate',
+        quietHoursEnabled: false,
+        quietHoursStart: '22:00',
+        quietHoursEnd: '07:00',
+    },
 }
 
 export const useUserStore = create<UserStore>()(
@@ -109,6 +126,9 @@ export const useUserStore = create<UserStore>()(
 
             setGuardianAutoSpeak: (guardianAutoSpeak) =>
                 set((state) => ({ profile: { ...state.profile, guardianAutoSpeak } })),
+
+            setNotificationPreferences: (notificationPreferences) =>
+                set((state) => ({ profile: { ...state.profile, notificationPreferences } })),
 
             calculateResilienceScore: () => {
                 const profile = get().profile

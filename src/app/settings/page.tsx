@@ -95,6 +95,7 @@ export default function SettingsPage() {
                                 key={item.label}
                                 icon={item.icon}
                                 label={item.label}
+                                href={item.href}
                                 isLast={index === menuItems.account.length - 1}
                             />
                         ))}
@@ -136,6 +137,7 @@ export default function SettingsPage() {
                                 key={item.label}
                                 icon={item.icon}
                                 label={item.label}
+                                href={item.href}
                                 isLast={index === menuItems.legal.length - 1}
                             />
                         ))}
@@ -212,9 +214,13 @@ export default function SettingsPage() {
     )
 }
 
-function MenuItem({ icon: Icon, label, isLast }: { icon: any, label: string, isLast?: boolean }) {
+function MenuItem({ icon: Icon, label, href, isLast }: { icon: any, label: string, href?: string, isLast?: boolean }) {
+    const router = useRouter()
     return (
-        <div className={`flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${!isLast ? 'border-b border-gray-100 dark:border-slate-800' : ''}`}>
+        <div
+            onClick={() => href && router.push(href)}
+            className={`flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors ${!isLast ? 'border-b border-gray-100 dark:border-slate-800' : ''}`}
+        >
             <div className="flex items-center gap-4">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <Icon className="w-5 h-5" />
