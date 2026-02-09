@@ -77,43 +77,44 @@ export default function GuardianTestPage() {
                 callbacks: {
                     onopen: () => {
                         log('✅ WebSocket OPEN')
-
-                        // Check if we were disconnected before this fired
-                        if (!sessionRef.current) {
-                            log('⚠️ Session was nulled before onopen fired (Strict Mode cleanup)')
-                            return
-                        }
-
                         setStatus('connected')
 
-                        // Send keepalive
-                        try {
-                            const silence = new Int16Array(8000)
-                            const buffer = new Uint8Array(silence.buffer)
-                            let binary = ''
-                            for (let i = 0; i < buffer.byteLength; i++) {
-                                binary += String.fromCharCode(buffer[i])
-                            }
-                            const base64 = btoa(binary)
-
-                            sessionRef.current?.sendRealtimeInput({
-                                audio: { data: base64, mimeType: 'audio/pcm;rate=16000' }
-                            })
-                            log('✅ Sent silence keepalive')
-                        } catch (e: any) {
-                            log(`❌ Keepalive error: ${e.message}`)
-                        }
-
-                        // Send greeting
+                        // Wait a tick for sessionRef to be set after connect() returns
                         setTimeout(() => {
-                            if (sessionRef.current) {
-                                sessionRef.current.sendClientContent({
-                                    turns: [{ role: 'user', parts: [{ text: 'Hello! Say one short sentence.' }] }],
-                                    turnComplete: true,
-                                })
-                                log('📤 Sent greeting message')
+                            if (!sessionRef.current) {
+                                log('⚠️ Session not available after timeout')
+                                return
                             }
-                        }, 1000)
+
+                            // Send keepalive
+                            try {
+                                const silence = new Int16Array(8000)
+                                const buffer = new Uint8Array(silence.buffer)
+                                let binary = ''
+                                for (let i = 0; i < buffer.byteLength; i++) {
+                                    binary += String.fromCharCode(buffer[i])
+                                }
+                                const base64 = btoa(binary)
+
+                                sessionRef.current.sendRealtimeInput({
+                                    audio: { data: base64, mimeType: 'audio/pcm;rate=16000' }
+                                })
+                                log('✅ Sent silence keepalive')
+                            } catch (e: any) {
+                                log(`❌ Keepalive error: ${e.message}`)
+                            }
+
+                            // Send greeting
+                            setTimeout(() => {
+                                if (sessionRef.current) {
+                                    sessionRef.current.sendClientContent({
+                                        turns: [{ role: 'user', parts: [{ text: 'Hello! Say one short sentence.' }] }],
+                                        turnComplete: true,
+                                    })
+                                    log('📤 Sent greeting message')
+                                }
+                            }, 500)
+                        }, 100)
                     },
                     onmessage: (message: any) => {
                         if (message.serverContent?.modelTurn?.parts) {
