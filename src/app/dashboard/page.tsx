@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow, Zap, AlertTriangle, Waves } from 'lucide-react'
+import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow, Zap, AlertTriangle, Waves, Mic } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useUserStore } from '@/store/userStore'
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                     onClick={() => router.push('/guardian')}
                 >
                     <div className="mr-6 border-2 border-white/30 rounded-full p-2">
-                        <Shield className="w-8 h-8 text-white" />
+                        <Mic className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex flex-col items-start text-white">
                         <span className="text-lg font-bold uppercase tracking-wide">Guardian Live</span>
