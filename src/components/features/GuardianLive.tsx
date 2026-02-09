@@ -43,6 +43,7 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
     const transcriptEndRef = useRef<HTMLDivElement>(null)
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const contextRef = useRef<GuardianContext | null>(null)
+    const isMountedRef = useRef(true)
 
     // --- Scroll to bottom on new transcript ---
     useEffect(() => {
@@ -116,6 +117,8 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
 
     // --- Reconnection Logic (Priority 3) ---
     const handleReconnect = useCallback(() => {
+        if (!isMountedRef.current) return
+
         // Clear any existing timeout
         if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current)
@@ -145,9 +148,11 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
 
     // --- Initial Connection ---
     useEffect(() => {
+        isMountedRef.current = true
         connect()
 
         return () => {
+            isMountedRef.current = false
             // Cleanup on unmount
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current)

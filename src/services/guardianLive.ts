@@ -84,10 +84,9 @@ export class GuardianLiveService {
         this.callbacks = callbacks
 
         try {
-            // Initialize with ephemeral token - MUST use v1alpha for ephemeral tokens
+            // Initialize with API Key directly (for now)
             this.ai = new GoogleGenAI({
                 apiKey: token,
-                httpOptions: { apiVersion: 'v1alpha' }
             })
 
             // Create audio context for playback at 24kHz (Gemini's output rate)
@@ -102,65 +101,68 @@ export class GuardianLiveService {
             this.session = await this.ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-12-2025',
                 config: {
-                    responseModalities: [Modality.AUDIO, Modality.TEXT],
+                    responseModalities: [Modality.AUDIO], // Native audio model only supports AUDIO request config
                     systemInstruction: createSystemPrompt(context),
                 },
                 callbacks: {
                     onopen: () => {
-                        // Check if session is still valid (prevent React Strict Mode race condition)
-                        if (!this.session) {
-                            console.log('Guardian: onopen fired but session was already closed (Strict Mode cleanup)')
-                            return
-                        }
-
-                        console.log('Guardian connected to Gemini Live')
-                        this.isConnecting = false
-
-                        // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
-                        // MUST be 16-bit Linear PCM (Int16Array) at 16kHz
-                        try {
-                            // 0.5 second of silence at 16kHz = 8000 samples
-                            const pcm16 = new Int16Array(8000) // Default initialized to 0s (silence)
-
-                            // Convert to bytes for Base64 (little-endian)
-                            const buffer = new Uint8Array(pcm16.buffer)
-
-                            // Efficient binary string construction
-                            let binary = ''
-                            const len = buffer.byteLength
-                            for (let i = 0; i < len; i++) {
-                                binary += String.fromCharCode(buffer[i])
-                            }
-                            const base64Silent = btoa(binary)
-
-                            // Check again before sending (session might have closed)
-                            if (this.session) {
-                                this.session.sendRealtimeInput({
-                                    audio: {
-                                        data: base64Silent,
-                                        mimeType: 'audio/pcm;rate=16000',
-                                    },
-                                })
-                                console.log('Guardian: sent valid 16-bit PCM keepalive')
-                            }
-                        } catch (e) {
-                            console.error('Guardian: failed to send keepalive', e)
-                        }
-
-                        callbacks.onConnected()
-
-                        // Send initial greeting to trigger Guardian's introduction
+                        // Wait a tick for session to be assigned to this.session
                         setTimeout(() => {
-                            if (this.session) {
-                                this.session.sendClientContent({
-                                    turns: [{
-                                        role: 'user',
-                                        parts: [{ text: 'Hello Guardian, I need your help.' }]
-                                    }],
-                                    turnComplete: true,
-                                })
+                            // Check if session is still valid (prevent React Strict Mode race condition)
+                            if (!this.session) {
+                                console.log('Guardian: onopen fired but session was already closed (Strict Mode cleanup)')
+                                return
                             }
-                        }, 500)
+
+                            console.log('Guardian connected to Gemini Live')
+                            this.isConnecting = false
+
+                            // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
+                            // MUST be 16-bit Linear PCM (Int16Array) at 16kHz
+                            try {
+                                // 0.5 second of silence at 16kHz = 8000 samples
+                                const pcm16 = new Int16Array(8000) // Default initialized to 0s (silence)
+
+                                // Convert to bytes for Base64 (little-endian)
+                                const buffer = new Uint8Array(pcm16.buffer)
+
+                                // Efficient binary string construction
+                                let binary = ''
+                                const len = buffer.byteLength
+                                for (let i = 0; i < len; i++) {
+                                    binary += String.fromCharCode(buffer[i])
+                                }
+                                const base64Silent = btoa(binary)
+
+                                // Check again before sending (session might have closed)
+                                if (this.session) {
+                                    this.session.sendRealtimeInput({
+                                        audio: {
+                                            data: base64Silent,
+                                            mimeType: 'audio/pcm;rate=16000',
+                                        },
+                                    })
+                                    console.log('Guardian: sent valid 16-bit PCM keepalive')
+                                }
+                            } catch (e) {
+                                console.error('Guardian: failed to send keepalive', e)
+                            }
+
+                            callbacks.onConnected()
+
+                            // Send initial greeting to trigger Guardian's introduction
+                            setTimeout(() => {
+                                if (this.session) {
+                                    this.session.sendClientContent({
+                                        turns: [{
+                                            role: 'user',
+                                            parts: [{ text: 'Hello Guardian, I need your help.' }]
+                                        }],
+                                        turnComplete: true,
+                                    })
+                                }
+                            }, 500)
+                        }, 100)
                     },
                     onmessage: (message: any) => {
                         this.handleMessage(message)
