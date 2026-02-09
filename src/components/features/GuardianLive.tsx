@@ -219,7 +219,7 @@ export function GuardianLive({ onClose, simulationAlert, isSimulation = false }:
                     <X className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
-                    <Shield className={`h-5 w-5 ${isSimulation ? 'text-yellow-500' : 'text-blue-600 dark:text-blue-400'}`} />
+                    <Mic className={`h-5 w-5 ${isSimulation ? 'text-yellow-500' : 'text-blue-600 dark:text-blue-400'}`} />
                     <span className="font-semibold text-lg text-gray-900 dark:text-white">Guardian</span>
                     {isSimulation && (
                         <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-medium">
