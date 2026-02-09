@@ -68,7 +68,8 @@ export class GuardianLiveService {
     private ai: GoogleGenAI | null = null
     private session: any = null
     private audioContext: AudioContext | null = null
-    private mediaRecorder: MediaRecorder | null = null
+    private audioWorkletNode: AudioWorkletNode | null = null
+    private mediaStream: MediaStream | null = null
     private audioQueue: ArrayBuffer[] = []
     private isPlaying = false
     private callbacks: GuardianCallbacks | null = null
@@ -89,11 +90,15 @@ export class GuardianLiveService {
                 httpOptions: { apiVersion: 'v1alpha' }
             })
 
-            // Create audio context for playback
+            // Create audio context for playback at 24kHz (Gemini's output rate)
             this.audioContext = new AudioContext({ sampleRate: 24000 })
 
+            // Resume if suspended (mobile Safari issue)
+            if (this.audioContext.state === 'suspended') {
+                await this.audioContext.resume()
+            }
+
             // Connect to Gemini Live
-            // Using gemini-3-pro-preview for hackathon (more stable than flash)
             this.session = await this.ai.live.connect({
                 model: 'gemini-3-pro-preview',
                 config: {
@@ -108,9 +113,7 @@ export class GuardianLiveService {
                         // IMMEDIATELY send silent audio packet to satisfy audio modality requirement
                         // MUST be 16-bit Linear PCM (Int16Array) at 16kHz
                         try {
-                            // 0.5 second of silence at 16kHz
-                            // 16kHz * 0.5s = 8000 samples
-                            // Int16Array takes 2 bytes per element, so header is handled by mimetype
+                            // 0.5 second of silence at 16kHz = 8000 samples
                             const pcm16 = new Int16Array(8000) // Default initialized to 0s (silence)
 
                             // Convert to bytes for Base64 (little-endian)
@@ -138,7 +141,6 @@ export class GuardianLiveService {
                         callbacks.onConnected()
 
                         // Send initial greeting to trigger Guardian's introduction
-                        // This keeps the session alive and starts the conversation
                         setTimeout(() => {
                             if (this.session) {
                                 this.session.sendClientContent({
@@ -218,6 +220,11 @@ export class GuardianLiveService {
         const audioData = this.audioQueue.shift()!
 
         try {
+            // Resume AudioContext if suspended (mobile)
+            if (this.audioContext.state === 'suspended') {
+                await this.audioContext.resume()
+            }
+
             // Decode and play audio
             const audioBuffer = await this.audioContext.decodeAudioData(audioData.slice(0))
             const source = this.audioContext.createBufferSource()
@@ -239,26 +246,47 @@ export class GuardianLiveService {
 
     async startMicrophone(): Promise<void> {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
+            if (!this.audioContext) {
+                throw new Error('AudioContext not initialized')
+            }
+
+            // Request microphone with 16kHz sample rate (Gemini's input requirement)
+            this.mediaStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     sampleRate: 16000,
                     channelCount: 1,
                     echoCancellation: true,
                     noiseSuppression: true,
+                    autoGainControl: true,
                 },
             })
 
-            this.mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm;codecs=opus',
-            })
+            // Create MediaStreamSource
+            const source = this.audioContext.createMediaStreamSource(this.mediaStream)
 
-            this.mediaRecorder.ondataavailable = async (event) => {
-                if (event.data.size > 0 && this.session) {
-                    const arrayBuffer = await event.data.arrayBuffer()
-                    const base64 = btoa(
-                        String.fromCharCode(...new Uint8Array(arrayBuffer))
-                    )
+            // Load and create AudioWorklet for PCM processing
+            await this.audioContext.audioWorklet.addModule('/pcm-recorder-worklet.js')
 
+            this.audioWorkletNode = new AudioWorkletNode(this.audioContext, 'pcm-recorder-processor')
+
+            // Handle PCM data from worklet
+            this.audioWorkletNode.port.onmessage = (event) => {
+                if (this.session && event.data) {
+                    // event.data is Int16Array buffer (raw PCM)
+                    const int16Array = new Int16Array(event.data)
+
+                    // Convert to Uint8Array for base64 encoding
+                    const uint8Array = new Uint8Array(int16Array.buffer)
+
+                    // Encode to base64
+                    let binary = ''
+                    const len = uint8Array.byteLength
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode(uint8Array[i])
+                    }
+                    const base64 = btoa(binary)
+
+                    // Send to Gemini as proper PCM
                     this.session.sendRealtimeInput({
                         audio: {
                             data: base64,
@@ -268,7 +296,12 @@ export class GuardianLiveService {
                 }
             }
 
-            this.mediaRecorder.start(100) // Send chunks every 100ms
+            // Connect audio pipeline
+            source.connect(this.audioWorkletNode)
+            this.audioWorkletNode.connect(this.audioContext.destination)
+
+            console.log('Guardian: Microphone started with raw PCM capture')
+
         } catch (error: any) {
             console.error('Failed to start microphone:', error)
             this.callbacks?.onError('Microphone access denied')
@@ -277,9 +310,14 @@ export class GuardianLiveService {
     }
 
     stopMicrophone(): void {
-        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-            this.mediaRecorder.stop()
-            this.mediaRecorder.stream.getTracks().forEach(track => track.stop())
+        if (this.audioWorkletNode) {
+            this.audioWorkletNode.disconnect()
+            this.audioWorkletNode = null
+        }
+
+        if (this.mediaStream) {
+            this.mediaStream.getTracks().forEach(track => track.stop())
+            this.mediaStream = null
         }
     }
 
@@ -307,6 +345,7 @@ export class GuardianLiveService {
 
         this.audioQueue = []
         this.ai = null
+        this.isConnecting = false
     }
 }
 

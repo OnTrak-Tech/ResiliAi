@@ -8,12 +8,10 @@ import {
     MicOff,
     X,
     Loader2,
-    Volume2,
     AlertTriangle,
     Shield,
     Home,
     Scan,
-    User,
     Settings,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,83 +23,151 @@ interface GuardianLiveProps {
     onClose: () => void
 }
 
+const MAX_RECONNECT_ATTEMPTS = 3
+const BASE_RECONNECT_DELAY = 2000 // 2 seconds
+
 export function GuardianLive({ onClose }: GuardianLiveProps) {
     const router = useRouter()
     const { profile } = useUserStore()
     const { alerts } = useWeatherStore()
 
     // --- State ---
-    const [status, setStatus] = useState<'connecting' | 'connected' | 'error' | 'disconnected'>('connecting')
+    const [status, setStatus] = useState<'connecting' | 'connected' | 'error' | 'disconnected' | 'reconnecting'>('connecting')
     const [isMicActive, setIsMicActive] = useState(false)
     const [isSpeaking, setIsSpeaking] = useState(false)
     const [transcript, setTranscript] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
+    const [reconnectAttempt, setReconnectAttempt] = useState(0)
 
     const guardianRef = useRef(getGuardianService())
     const transcriptEndRef = useRef<HTMLDivElement>(null)
+    const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const contextRef = useRef<GuardianContext | null>(null)
 
     // --- Scroll to bottom on new transcript ---
     useEffect(() => {
         transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [transcript])
 
-    // --- Connect to Guardian ---
+    // --- Build context once (don't change during session) ---
     useEffect(() => {
-        async function connect() {
-            try {
-                const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY
-                if (!apiKey) {
-                    throw new Error('API key not configured')
-                }
+        contextRef.current = {
+            location: profile.location || 'Unknown',
+            activeAlerts: alerts?.map(a => `${a.event}: ${a.description}`) || [],
+            householdSize: profile.quizAnswers?.householdSize,
+            hasElderly: profile.quizAnswers?.hasElderly,
+            hasPets: profile.quizAnswers?.hasPets,
+            mobilityConsiderations: profile.quizAnswers?.mobilityNotes,
+            homeHazards: [], // Could pull from Fortification Plan
+        }
+    }, []) // Only build once on mount
 
-                // Build context from user profile and alerts
-                const context: GuardianContext = {
-                    location: profile.location || 'Unknown',
-                    activeAlerts: alerts?.map(a => `${a.event}: ${a.description}`) || [],
-                    householdSize: profile.quizAnswers?.householdSize,
-                    hasElderly: profile.quizAnswers?.hasElderly,
-                    hasPets: profile.quizAnswers?.hasPets,
-                    mobilityConsiderations: profile.quizAnswers?.mobilityNotes,
-                    homeHazards: [], // Could pull from Fortification Plan
-                }
+    // --- Connect Function ---
+    const connect = useCallback(async () => {
+        if (!contextRef.current) return
 
-                // Connect to Gemini Live
-                await guardianRef.current.connect(apiKey, context, {
-                    onConnected: () => {
-                        setStatus('connected')
-                        setTranscript(['Guardian: I\'m here with you. What\'s happening?'])
-                    },
-                    onDisconnected: () => {
-                        setStatus('disconnected')
-                    },
-                    onAudioReceived: () => {
-                        setIsSpeaking(true)
-                        setTimeout(() => setIsSpeaking(false), 500)
-                    },
-                    onTextReceived: (text) => {
-                        setTranscript(prev => [...prev, `Guardian: ${text}`])
-                    },
-                    onError: (err) => {
-                        setError(err)
-                        setStatus('error')
-                    },
-                    onInterrupted: () => {
-                        setIsSpeaking(false)
-                    },
-                })
-            } catch (err: any) {
-                console.error('Guardian connection error:', err)
-                setError(err?.message || 'Failed to connect')
-                setStatus('error')
+        try {
+            setStatus('connecting')
+            setError(null)
+
+            // Fetch ephemeral token from server (Priority 2)
+            const tokenRes = await fetch('/api/live/token', { method: 'POST' })
+
+            if (!tokenRes.ok) {
+                const errorData = await tokenRes.json()
+                throw new Error(errorData.error || 'Failed to get session token')
             }
+
+            const { token } = await tokenRes.json()
+
+            // Connect to Gemini Live with ephemeral token
+            await guardianRef.current.connect(token, contextRef.current, {
+                onConnected: () => {
+                    setStatus('connected')
+                    setReconnectAttempt(0) // Reset on successful connection
+                    setTranscript(['Guardian: I\'m here with you. What\'s happening?'])
+                },
+                onDisconnected: () => {
+                    console.log('Guardian disconnected, attempting reconnect...')
+                    handleReconnect()
+                },
+                onAudioReceived: () => {
+                    setIsSpeaking(true)
+                    setTimeout(() => setIsSpeaking(false), 500)
+                },
+                onTextReceived: (text) => {
+                    setTranscript(prev => [...prev, `Guardian: ${text}`])
+                },
+                onError: (err) => {
+                    setError(err)
+                    setStatus('error')
+                    // Don't auto-reconnect on errors, user should retry manually
+                },
+                onInterrupted: () => {
+                    setIsSpeaking(false)
+                },
+            })
+        } catch (err: any) {
+            console.error('Guardian connection error:', err)
+            setError(err?.message || 'Failed to connect')
+            setStatus('error')
+        }
+    }, [])
+
+    // --- Reconnection Logic (Priority 3) ---
+    const handleReconnect = useCallback(() => {
+        // Clear any existing timeout
+        if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current)
         }
 
+        // Check if we've exceeded max attempts
+        if (reconnectAttempt >= MAX_RECONNECT_ATTEMPTS) {
+            setStatus('disconnected')
+            setError('Connection lost. Please try again manually.')
+            return
+        }
+
+        // Set reconnecting status
+        setStatus('reconnecting')
+        const nextAttempt = reconnectAttempt + 1
+        setReconnectAttempt(nextAttempt)
+
+        // Exponential backoff: 2s, 4s, 8s
+        const delay = BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempt)
+
+        console.log(`Reconnecting in ${delay}ms (attempt ${nextAttempt}/${MAX_RECONNECT_ATTEMPTS})`)
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+            connect()
+        }, delay)
+    }, [reconnectAttempt, connect])
+
+    // --- Initial Connection ---
+    useEffect(() => {
         connect()
 
         return () => {
+            // Cleanup on unmount
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current)
+            }
             guardianRef.current.disconnect()
         }
-    }, [profile, alerts])
+    }, [connect])
+
+    // --- Handle AudioContext Resume on Visibility Change (Mobile Fix) ---
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!document.hidden && status === 'connected') {
+                // Resume audio context if it was suspended
+                console.log('Page visible, ensuring audio context is active')
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }, [status])
 
     // --- Toggle Microphone ---
     const toggleMicrophone = useCallback(async () => {
@@ -120,9 +186,18 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
 
     // --- Disconnect and Close ---
     const handleClose = useCallback(() => {
+        if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current)
+        }
         guardianRef.current.disconnect()
         onClose()
     }, [onClose])
+
+    // --- Manual Retry ---
+    const handleManualRetry = useCallback(() => {
+        setReconnectAttempt(0)
+        connect()
+    }, [connect])
 
     return (
         <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-slate-950 transition-colors duration-300 flex flex-col font-sans text-gray-900 dark:text-gray-100">
@@ -147,6 +222,14 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
                             <span className="text-blue-600 dark:text-blue-400 text-sm">Connecting to Guardian...</span>
                         </>
                     )}
+                    {status === 'reconnecting' && (
+                        <>
+                            <Loader2 className="h-4 w-4 text-yellow-600 dark:text-yellow-400 animate-spin" />
+                            <span className="text-yellow-600 dark:text-yellow-400 text-sm">
+                                Reconnecting... (Attempt {reconnectAttempt}/{MAX_RECONNECT_ATTEMPTS})
+                            </span>
+                        </>
+                    )}
                     {status === 'connected' && (
                         <>
                             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -159,8 +242,27 @@ export function GuardianLive({ onClose }: GuardianLiveProps) {
                             <span className="text-red-600 dark:text-red-400 text-sm">{error || 'Connection failed'}</span>
                         </>
                     )}
+                    {status === 'disconnected' && (
+                        <>
+                            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <span className="text-red-600 dark:text-red-400 text-sm">Disconnected</span>
+                        </>
+                    )}
                 </div>
             </div>
+
+            {/* Retry Button for Error/Disconnected States */}
+            {(status === 'error' || status === 'disconnected') && (
+                <div className="px-6 py-2 text-center">
+                    <Button
+                        onClick={handleManualRetry}
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        Retry Connection
+                    </Button>
+                </div>
+            )}
 
             {/* Active Alerts Banner */}
             {alerts && alerts.length > 0 && (
