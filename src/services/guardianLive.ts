@@ -74,6 +74,7 @@ export class GuardianLiveService {
     private isPlaying = false
     private callbacks: GuardianCallbacks | null = null
     private isConnecting = false
+    private nextPlayTime = 0 // For seamless audio scheduling
 
     async connect(token: string, context: GuardianContext, callbacks: GuardianCallbacks): Promise<void> {
         if (this.isConnecting) {
@@ -229,44 +230,61 @@ export class GuardianLiveService {
     }
 
     private async playNextAudio() {
-        if (this.isPlaying || this.audioQueue.length === 0 || !this.audioContext) return
+        if (this.audioQueue.length === 0 || !this.audioContext) return
 
-        this.isPlaying = true
-        const audioData = this.audioQueue.shift()!
+        // Resume AudioContext if suspended (mobile)
+        if (this.audioContext.state === 'suspended') {
+            await this.audioContext.resume()
+        }
 
-        try {
-            // Resume AudioContext if suspended (mobile)
-            if (this.audioContext.state === 'suspended') {
-                await this.audioContext.resume()
+        // Process all queued audio chunks with precise scheduling
+        while (this.audioQueue.length > 0) {
+            const audioData = this.audioQueue.shift()!
+
+            try {
+                // Gemini sends raw 16-bit PCM at 24kHz - convert to Float32 AudioBuffer
+                const int16Array = new Int16Array(audioData)
+                const float32Array = new Float32Array(int16Array.length)
+
+                // Convert Int16 (-32768 to 32767) to Float32 (-1.0 to 1.0)
+                for (let i = 0; i < int16Array.length; i++) {
+                    float32Array[i] = int16Array[i] / 32768.0
+                }
+
+                // Create AudioBuffer at 24kHz (Gemini's output sample rate)
+                const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, 24000)
+                audioBuffer.copyToChannel(float32Array, 0)
+
+                const source = this.audioContext.createBufferSource()
+                source.buffer = audioBuffer
+                source.connect(this.audioContext.destination)
+
+                // Schedule precisely - no gaps between chunks
+                const currentTime = this.audioContext.currentTime
+                const startTime = Math.max(currentTime, this.nextPlayTime)
+
+                source.start(startTime)
+                this.nextPlayTime = startTime + audioBuffer.duration
+
+                // Mark as playing and notify
+                if (!this.isPlaying) {
+                    this.isPlaying = true
+                    this.callbacks?.onAudioReceived(audioData)
+                }
+
+                // Set up end detection for the last scheduled chunk
+                source.onended = () => {
+                    // Check if queue is empty and we're past scheduled time
+                    if (this.audioQueue.length === 0 && this.audioContext) {
+                        if (this.audioContext.currentTime >= this.nextPlayTime - 0.01) {
+                            this.isPlaying = false
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Failed to play audio chunk:', error)
             }
-
-            // Gemini sends raw 16-bit PCM at 24kHz - convert to Float32 AudioBuffer
-            const int16Array = new Int16Array(audioData)
-            const float32Array = new Float32Array(int16Array.length)
-
-            // Convert Int16 (-32768 to 32767) to Float32 (-1.0 to 1.0)
-            for (let i = 0; i < int16Array.length; i++) {
-                float32Array[i] = int16Array[i] / 32768.0
-            }
-
-            // Create AudioBuffer at 24kHz (Gemini's output sample rate)
-            const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, 24000)
-            audioBuffer.copyToChannel(float32Array, 0)
-
-            const source = this.audioContext.createBufferSource()
-            source.buffer = audioBuffer
-            source.connect(this.audioContext.destination)
-            source.onended = () => {
-                this.isPlaying = false
-                this.playNextAudio()
-            }
-            source.start()
-
-            this.callbacks?.onAudioReceived(audioData)
-        } catch (error) {
-            console.error('Failed to play audio:', error)
-            this.isPlaying = false
-            this.playNextAudio()
         }
     }
 
