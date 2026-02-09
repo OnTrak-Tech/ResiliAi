@@ -71,8 +71,8 @@ export default function GuardianTestPage() {
             sessionRef.current = await ai.live.connect({
                 model: MODEL,
                 config: {
-                    responseModalities: [Modality.AUDIO, Modality.TEXT],
-                    systemInstruction: 'You are a helpful assistant. Keep responses brief.',
+                    responseModalities: [Modality.AUDIO], // Native audio model might only support AUDIO
+                    systemInstruction: { parts: [{ text: 'You are a helpful assistant. Keep responses brief.' }] },
                 },
                 callbacks: {
                     onopen: () => {
