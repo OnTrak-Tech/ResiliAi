@@ -67,7 +67,7 @@ export default function DashboardPage() {
             >
                 <div className="relative w-64 h-24 mb-2">
                     <Image
-                        src="/icons/ResiliAi.png"
+                        src="/icons/ResiliAi-logo.png"
                         alt="ResiliAi Logo"
                         fill
                         className="object-contain"
