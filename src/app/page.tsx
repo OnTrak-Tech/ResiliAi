@@ -37,7 +37,7 @@ export default function HomePage() {
         >
           <div className="relative w-64 h-24 mb-6">
             <Image
-              src="/icons/ResiliAi.png"
+              src="/icons/ResiliAi-logo.png"
               alt="ResiliAi Logo"
               fill
               className="object-contain"
