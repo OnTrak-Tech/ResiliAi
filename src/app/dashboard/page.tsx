@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Sun, CheckCircle, Home, Camera, Phone, Users, Scan, User, Settings, Cloud, CloudRain, CloudSnow, Zap, AlertTriangle, Waves } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -21,6 +20,13 @@ const getWeatherIcon = (temp: number, condition: string) => {
     if (c.includes('snow')) return <CloudSnow className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
     if (c.includes('clear') || c.includes('sun')) return <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
     return <Sun className="text-orange-400 h-8 w-8 mb-2" fill="currentColor" />
+}
+
+const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 17) return 'Good afternoon'
+    return 'Good evening'
 }
 
 export default function DashboardPage() {
@@ -68,22 +74,19 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 pb-24 font-sans flex flex-col items-center transition-colors duration-300">
 
-            {/* Logo Section */}
+            {/* Greeting Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="w-full pt-8 pb-4 flex flex-col items-center relative bg-gray-50 dark:bg-slate-950 transition-colors"
+                className="w-full max-w-md pt-10 pb-6 px-6"
             >
-                <div className="relative w-64 h-24 mb-2">
-                    <Image
-                        src="/icons/ResiliAi-logo.png"
-                        alt="ResiliAi Logo"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
-                </div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {getGreeting()}, {profile.name || 'there'} 👋
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Stay safe and prepared today
+                </p>
             </motion.div>
 
             <main className="w-full max-w-md px-6 space-y-4">
@@ -275,8 +278,8 @@ export default function DashboardPage() {
                                         key={scenario.id}
                                         onClick={() => setSelectedScenario(scenario.id)}
                                         className={`w-full p-3 rounded-xl border-2 flex items-center gap-3 transition-all ${selectedScenario === scenario.id
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                            : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
                                             }`}
                                     >
                                         <div className={`w-10 h-10 rounded-lg ${scenario.color} flex items-center justify-center`}>

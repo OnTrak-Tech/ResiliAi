@@ -19,13 +19,28 @@ Panic freezes the brain. ResiliAi unfreezes it.
 *   **Calm Guidance:** A reasoning voice assistant (Gemini Live) talks you through smoke, floods, or blackouts in real-time.
 *   **Emotional Regulation:** The AI adapts its tone to de-escalate panic while keeping you moving.
 
-###  "Drill Sergeant" Simulations
+### 🎮 "Drill Sergeant" Simulations (Practice Mode)
 Don't just read about disasters—live them (virtually).
 *   **Interactive Scenarios:** "It's 2 AM. Flood sirens are blaring. Battery is 12%. What do you do?"
 *   **Personalized:** Utilizing your *actual* home inventory scanned by Sentinel.
 *   **Gamified:** Earn Resilience Points for making the right active decisions.
 
-###  "Lifeline" Community Mesh
+#### 🔥 How Practice Mode Works
+From the dashboard, tap **"Practice Mode"** to launch a simulated emergency:
+
+| Scenario | What Guardian Receives |
+|----------|----------------------|
+| 🌪️ Tornado Warning | `[SIMULATION] Tornado approaching your area...` |
+| ⚠️ Earthquake | `[SIMULATION] Strong earthquake activity detected...` |
+| 🌊 Flash Flood | `[SIMULATION] Flash flood warning in effect...` |
+
+*   **Same AI, Safe Context:** Guardian provides real guidance based on the simulated scenario—no actual alerts triggered.
+*   **Visual Indicator:** A yellow "Practice" badge appears so users know they're training.
+*   **Seamless Transition:** In a real emergency, Guardian automatically uses **live weather data** from OpenWeatherMap.
+
+> **For Judges:** Practice Mode demonstrates the app's training capability. In real use, Guardian receives actual weather alerts from the user's location, enabling context-aware emergency guidance.
+
+### 🔗 "Lifeline" Community Mesh
 When cell towers fail, your community shouldn't.
 *   **Offline-First:** Critical data is stored locally on your device.
 *   **Supply Matching:** "Neighbor Sarah has extra water." (Mesh Protocol Mockup).
