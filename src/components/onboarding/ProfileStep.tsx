@@ -64,7 +64,7 @@ export function ProfileStep({ onComplete }: { onComplete: () => void }) {
                     <div className="absolute left-0 top-0 bottom-0 w-1/3 bg-[#1e40af] rounded-full" />
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Professional Profile Setup</h2>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Profile Setup</h2>
             </motion.div>
 
             <div className="space-y-6 flex-1">
