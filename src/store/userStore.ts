@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 export interface UserProfile {
     id: string
     name: string
+    email: string
     location: string
     emergencyContact: {
         name: string
@@ -21,6 +22,7 @@ export interface UserProfile {
 interface UserStore {
     profile: UserProfile
     setName: (name: string) => void
+    setEmail: (email: string) => void
     setLocation: (location: string) => void
     setEmergencyContact: (contact: UserProfile['emergencyContact']) => void
     setHousingType: (type: 'house' | 'apartment') => void
@@ -36,6 +38,7 @@ interface UserStore {
 const initialProfile: UserProfile = {
     id: crypto.randomUUID(),
     name: '',
+    email: '',
     location: '',
     emergencyContact: { name: '', phone: '' },
     housingType: null,
@@ -54,6 +57,9 @@ export const useUserStore = create<UserStore>()(
 
             setName: (name) =>
                 set((state) => ({ profile: { ...state.profile, name } })),
+
+            setEmail: (email) =>
+                set((state) => ({ profile: { ...state.profile, email } })),
 
             setLocation: (location) =>
                 set((state) => ({ profile: { ...state.profile, location } })),

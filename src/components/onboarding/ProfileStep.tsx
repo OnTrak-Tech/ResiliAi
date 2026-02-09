@@ -8,18 +8,18 @@ import { useUserStore } from '@/store/userStore'
 import { MapPin } from 'lucide-react'
 
 export function ProfileStep({ onComplete }: { onComplete: () => void }) {
-    const { profile, setName, setLocation, setEmergencyContact } = useUserStore()
+    const { profile, setName, setEmail, setLocation, setEmergencyContact } = useUserStore()
     const [isValid, setIsValid] = useState(false)
-    const [email, setEmail] = useState('')
 
     useEffect(() => {
         setIsValid(
             profile.name.length > 0 &&
+            profile.email.length > 0 &&
             profile.location.length > 0 &&
             profile.emergencyContact.name.length > 0 &&
             profile.emergencyContact.phone.length > 0
         )
-    }, [profile, email])
+    }, [profile])
 
     return (
         <div className="flex flex-col h-full w-full max-w-md mx-auto relative px-6 font-sans">
@@ -58,7 +58,7 @@ export function ProfileStep({ onComplete }: { onComplete: () => void }) {
                     <Input
                         placeholder="Enter your email"
                         type="email"
-                        value={email}
+                        value={profile.email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="h-12 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-xl focus:ring-2 focus:ring-[#1e40af] focus:border-[#1e40af] transition-all"
                     />
