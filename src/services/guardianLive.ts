@@ -107,6 +107,12 @@ export class GuardianLiveService {
                 },
                 callbacks: {
                     onopen: () => {
+                        // Check if session is still valid (prevent React Strict Mode race condition)
+                        if (!this.session) {
+                            console.log('Guardian: onopen fired but session was already closed (Strict Mode cleanup)')
+                            return
+                        }
+
                         console.log('Guardian connected to Gemini Live')
                         this.isConnecting = false
 
@@ -127,13 +133,16 @@ export class GuardianLiveService {
                             }
                             const base64Silent = btoa(binary)
 
-                            this.session?.sendRealtimeInput({
-                                audio: {
-                                    data: base64Silent,
-                                    mimeType: 'audio/pcm;rate=16000',
-                                },
-                            })
-                            console.log('Guardian: sent valid 16-bit PCM keepalive')
+                            // Check again before sending (session might have closed)
+                            if (this.session) {
+                                this.session.sendRealtimeInput({
+                                    audio: {
+                                        data: base64Silent,
+                                        mimeType: 'audio/pcm;rate=16000',
+                                    },
+                                })
+                                console.log('Guardian: sent valid 16-bit PCM keepalive')
+                            }
                         } catch (e) {
                             console.error('Guardian: failed to send keepalive', e)
                         }
@@ -164,7 +173,11 @@ export class GuardianLiveService {
                     onclose: () => {
                         console.log('Guardian disconnected')
                         this.isConnecting = false
-                        callbacks.onDisconnected()
+
+                        // Only trigger reconnect if we still have callbacks (not during cleanup)
+                        if (this.callbacks) {
+                            callbacks.onDisconnected()
+                        }
                     },
                 },
             })
@@ -333,9 +346,16 @@ export class GuardianLiveService {
     disconnect(): void {
         this.stopMicrophone()
 
+        // Null session BEFORE closing to prevent callbacks from using it
         if (this.session) {
-            this.session.close()
+            const sessionToClose = this.session
             this.session = null
+
+            try {
+                sessionToClose.close()
+            } catch (e) {
+                console.log('Guardian: Error closing session (already closed)', e)
+            }
         }
 
         if (this.audioContext) {
@@ -344,6 +364,7 @@ export class GuardianLiveService {
         }
 
         this.audioQueue = []
+        this.callbacks = null // Also clear callbacks to prevent stale reconnect attempts
         this.ai = null
         this.isConnecting = false
     }
