@@ -44,17 +44,15 @@ export async function POST() {
         })
     } catch (error: any) {
         console.error('Failed to generate ephemeral token:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
 
-        // Check for specific error types
-        if (error?.message?.includes('401') || error?.message?.includes('API key')) {
-            return NextResponse.json(
-                { error: 'Invalid API key configuration' },
-                { status: 401 }
-            )
-        }
-
+        // Return actual error for debugging
         return NextResponse.json(
-            { error: 'Failed to generate session token. Please try again.' },
+            {
+                error: 'Failed to generate session token. Please try again.',
+                details: error?.message || 'Unknown error',
+                code: error?.code || 'UNKNOWN'
+            },
             { status: 500 }
         )
     }

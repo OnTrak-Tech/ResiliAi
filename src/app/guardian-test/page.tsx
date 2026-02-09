@@ -45,11 +45,11 @@ export default function GuardianTestPage() {
 
             // Get token from our API
             const tokenRes = await fetch('/api/live/token', { method: 'POST' })
+            const tokenData = await tokenRes.json()
             if (!tokenRes.ok) {
-                const err = await tokenRes.json()
-                throw new Error(err.error || 'Token fetch failed')
+                throw new Error(`Token error: ${tokenData.error} | Details: ${tokenData.details || 'none'} | Code: ${tokenData.code || 'none'}`)
             }
-            const { token } = await tokenRes.json()
+            const { token } = tokenData
             log(`✅ Token received (${token.substring(0, 20)}...)`)
 
             // Create audio context
@@ -229,8 +229,8 @@ export default function GuardianTestPage() {
 
             <div className="mb-4 flex items-center gap-4">
                 <span className={`inline-block w-3 h-3 rounded-full ${status === 'connected' ? 'bg-green-500 animate-pulse' :
-                        status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                            status === 'error' ? 'bg-red-500' : 'bg-gray-500'
+                    status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                        status === 'error' ? 'bg-red-500' : 'bg-gray-500'
                     }`} />
                 <span className="text-lg">Status: {status.toUpperCase()}</span>
                 {isPlaying && <span className="text-blue-400">🔊 Playing audio...</span>}
