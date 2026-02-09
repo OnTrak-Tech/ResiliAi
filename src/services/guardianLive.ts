@@ -240,8 +240,19 @@ export class GuardianLiveService {
                 await this.audioContext.resume()
             }
 
-            // Decode and play audio
-            const audioBuffer = await this.audioContext.decodeAudioData(audioData.slice(0))
+            // Gemini sends raw 16-bit PCM at 24kHz - convert to Float32 AudioBuffer
+            const int16Array = new Int16Array(audioData)
+            const float32Array = new Float32Array(int16Array.length)
+
+            // Convert Int16 (-32768 to 32767) to Float32 (-1.0 to 1.0)
+            for (let i = 0; i < int16Array.length; i++) {
+                float32Array[i] = int16Array[i] / 32768.0
+            }
+
+            // Create AudioBuffer at 24kHz (Gemini's output sample rate)
+            const audioBuffer = this.audioContext.createBuffer(1, float32Array.length, 24000)
+            audioBuffer.copyToChannel(float32Array, 0)
+
             const source = this.audioContext.createBufferSource()
             source.buffer = audioBuffer
             source.connect(this.audioContext.destination)
