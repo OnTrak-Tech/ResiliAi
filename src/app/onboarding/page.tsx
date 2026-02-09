@@ -16,13 +16,19 @@ export default function OnboardingPage() {
     const router = useRouter()
     const { profile, completeOnboarding, detectLocation } = useUserStore()
 
-    // Trigger detecting location on mount
+    // Trigger detecting location on mount & check for existing profile
     useEffect(() => {
+        // Prevent multiple profiles: Redirect if already onboarded
+        if (profile.onboardingComplete) {
+            router.replace('/dashboard')
+            return
+        }
+
         // Only try to detect if location is empty and on valid step
         if (!profile.location && currentStep === 'profile') {
             detectLocation()
         }
-    }, [])
+    }, [profile.onboardingComplete, router])
 
     const handleProfileComplete = () => {
         setCurrentStep('verification')
