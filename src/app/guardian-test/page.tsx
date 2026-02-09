@@ -41,16 +41,17 @@ export default function GuardianTestPage() {
 
         try {
             setStatus('connecting')
-            log('🔄 Fetching ephemeral token...')
+            log('🔄 Connecting to Gemini Live API...')
 
-            // Get token from our API
-            const tokenRes = await fetch('/api/live/token', { method: 'POST' })
-            const tokenData = await tokenRes.json()
-            if (!tokenRes.ok) {
-                throw new Error(`Token error: ${tokenData.error} | Details: ${tokenData.details || 'none'} | Code: ${tokenData.code || 'none'}`)
+            // ⚠️ SECURITY WARNING: For hackathon/demo only
+            // In production, use ephemeral tokens generated server-side
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY
+
+            if (!apiKey) {
+                throw new Error('NEXT_PUBLIC_GOOGLE_AI_API_KEY not found in environment')
             }
-            const { token } = tokenData
-            log(`✅ Token received (${token.substring(0, 20)}...)`)
+
+            log('✅ Using API key from environment')
 
             // Create audio context
             audioContextRef.current = new AudioContext({ sampleRate: 24000 })
@@ -59,11 +60,10 @@ export default function GuardianTestPage() {
             }
             log(`✅ AudioContext created (state: ${audioContextRef.current.state})`)
 
-            // Initialize Gemini client
+            // Initialize Gemini client with API key directly
             log('🔄 Creating GoogleGenAI client...')
             const ai = new GoogleGenAI({
-                apiKey: token,
-                httpOptions: { apiVersion: 'v1alpha' }
+                apiKey: apiKey,
             })
 
             // Connect to Live API
